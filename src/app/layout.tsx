@@ -42,7 +42,7 @@ export default function RootLayout({
                   >
                     <div className="lg:pl-32">
 
-                      <div className="mx-auto max-w-4xl space-y-8 px-2 pt-20 lg:px-8 lg:py-1">
+                      <div className="mx-auto max-w-6xl space-y-8 px-2 pt-20 lg:px-16 lg:py-2">
 
                           <div class="grid  grid-cols-2">
                             <div><ThemeSwitch/></div>
@@ -60,7 +60,7 @@ export default function RootLayout({
 
                           </div>
                     </div>
-                  </ThemeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
