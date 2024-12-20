@@ -33,7 +33,18 @@ export default function Navigation() {
                 <NavigationMenuTrigger>Sample</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <NavigationMenuLink>
-                      <Link href="/ag-grid-sample" target="_self" >SamplePage
+                      <Link href="/ag-grid-sample" target="_self" />
+                  </NavigationMenuLink>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Trades</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <NavigationMenuLink>
+                      <Link href="/trades" target="_self" >TradePage
                       </Link>
                   </NavigationMenuLink>
                 </NavigationMenuContent>

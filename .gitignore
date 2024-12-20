@@ -34,3 +34,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/.gitignore
+/demo-trade-ui.iml
+/package-lock.json
+/pnpm-lock.yaml
+/.dockerignore
+/.nginx/mukizone_local_ssl.crt
+/.nginx/mukizone_local_ssl.csr
+/.nginx/mukizone_local_ssl.key
