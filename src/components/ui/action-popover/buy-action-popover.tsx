@@ -33,7 +33,7 @@ export default function BuyActionPopover(props : any) {
   )
 }
 
-function formatNumbers(price : number, qty : number, ){
+function formatNumbers(price : number, qty : number ){
           return <p>{new Intl.NumberFormat('en-IN').format(price * qty)}</p>
 }
 
@@ -99,9 +99,11 @@ export function ActionPopoverQuery(props : any) {
                         <Label >Qty.</Label>
                         <Input
                           id="quantity"
+                          type="number"
                           defaultValue="1"
                           className="col-span-1 h-8"
-                          onChange={e => setQuantity((e.target as HTMLInputElement).value)}
+                          //onChange={e => setQuantity((e.target as HTMLInputElement).value)}
+                          onChange={e => setQuantity(e.target.valueAsNumber)}
                         />
                       </div>
                     <div className="grid grid-cols-2 items-center gap-4">
@@ -119,7 +121,7 @@ export function ActionPopoverQuery(props : any) {
                         //onClick={() =>  {  actionTrade(symbol, quantity ,"B") }}
                         onClick={() =>  {
                                   toast({
-                                            title: "Buy: Msg ",
+                                            title: "Buy: Status ",
                                             description: actionTrade(symbol, quantity ),
                                             //description: "TEST TOAST",
                                   })
@@ -139,10 +141,10 @@ export function ActionPopoverQuery(props : any) {
 
 }
 
-function actionTrade(symbol: String, qty: number){
+function actionTrade(symbol: string, qty: number){
   //console.log("buyTrade " ,symbol )
   //console.log("qty " ,qty )
-    var actionStatus = "Succesfull"
+      var actionStatus = true;
       var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
       var action_url =  hosturl + "/tradingzone/holdings/buy/" + symbol +"?qty=" + qty;
 
@@ -162,7 +164,12 @@ function actionTrade(symbol: String, qty: number){
         .catch(error => console.error(error)); // Handle errors
 
       //console.log("actionTrade status" ,actionStatus )
-      return actionStatus;
+      if(actionStatus){
+        return symbol + " Qty : " + qty +" > successfull.";
+      }else{
+        return symbol + " Qty :" + qty +" > failure.";
+      }
+
 }
 
 export { BuyActionPopover }

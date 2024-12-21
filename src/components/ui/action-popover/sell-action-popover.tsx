@@ -43,11 +43,10 @@ function formatNumbers(price : number, qty : number, ){
 
 export function ActionPopoverQuery(props : any) {
 
-    const [quantity, setQuantity] = React.useState(1)
     const { toast } = useToast()
-
-    const queryClientSellPopover = useQueryClient()
+    const queryClientBuyPopover = useQueryClient()
     const symbol= props.symbol;
+    const [quantity, setQuantity] = React.useState(1)
     const holdqty=props.holdqty;
 
     var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
@@ -100,20 +99,25 @@ export function ActionPopoverQuery(props : any) {
                             <Label >Price.</Label>
                             <Label >{serverData.lastPric}</Label>
                           </div>
-
-
                           <div className="grid grid-cols-2 items-center gap-4">
-                            <Label >Amount</Label>
-                            <Label >
-
-                              {
-
-                                  formatNumbers(serverData.lastPric, quantity )
-                                  //new Intl.NumberFormat('en-IN').format(quantity * serverData.lastPric)
-                                    //quantity * serverData.lastPric
-                              }
-                              </Label>
+                            <Label >Qty.</Label>
+                            <Input
+                              id="quantity"
+                              type="number"
+                              defaultValue="1"
+                              className="col-span-1 h-8"
+                              //onChange={e => setQuantity((e.target as HTMLInputElement).value)}
+                              onChange={e => setQuantity(e.target.valueAsNumber)}
+                            />
                           </div>
+                            <div className="grid grid-cols-2 items-center gap-4">
+                              <Label >Amount</Label>
+                              <Label >
+                                {
+                                    formatNumbers(serverData.lastPric, quantity )
+                                }
+                                </Label>
+                            </div>
                         </div>
                         < div className="grid gap-4">
                          <div className="grid grid-cols-2 items-center gap-4">
@@ -145,7 +149,7 @@ function actionTrade(symbol: String, qty: number, holdqty: number){
 
       //  console.log(" holdqty : ",holdqty);
       //  console.log(" qty : ",qty);
-      var actionStatus = "Succesfull"
+      var actionStatus = true;
       var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
       var action_url =  hosturl + "/tradingzone/holdings/sell/" + symbol +"?qty=" + qty;
 
@@ -163,14 +167,18 @@ function actionTrade(symbol: String, qty: number, holdqty: number){
           // Make the request
           fetch(action_url, requestOptions)
             .then(response => response.json()) // Parse the response as JSON
-            .then(data => setActionStatus(data)) // Do something with the data
+            .then(data => actionStatus = data) // Do something with the data
             .catch(error => console.error(error)); // Handle errors
 
       }else{
-        actionStatus = "Cannot sell more than holding quantity";
+Buy and Sell MsgsBuy d         return symbol + " Qty to Sell : " + qty +" cannot exceed Holding Qty ie." + holdqty;
       }
       //console.log("actionTrade status" ,actionStatus )
-      return actionStatus;
+      if(actionStatus){
+        return symbol + " Qty : " + qty +" > successfull.";
+      }else{
+        return symbol + " Qty :" + qty +" > failure.";
+      }
 
 }
 
