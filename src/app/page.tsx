@@ -10,7 +10,8 @@ import { Architecture } from "./architecture";
 
 export default function Home() {
   return (
-    <div className="grid items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
+    <div className="flex min-h-4 w-full items-center justify-center p-6 md:p-10">
+    {/**<div className="grid items-center justify-items-center font-[family-name:var(--font-geist-sans)]">  */}
 
 
         <div className="flex justify-center flex-col m-auto">

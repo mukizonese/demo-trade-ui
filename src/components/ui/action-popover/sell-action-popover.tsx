@@ -171,7 +171,7 @@ function actionTrade(symbol: String, qty: number, holdqty: number){
             .catch(error => console.error(error)); // Handle errors
 
       }else{
-Buy and Sell MsgsBuy d         return symbol + " Qty to Sell : " + qty +" cannot exceed Holding Qty ie." + holdqty;
+            return symbol + " Qty to Sell : " + qty +" cannot exceed Holding Qty ie." + holdqty;
       }
       //console.log("actionTrade status" ,actionStatus )
       if(actionStatus){

@@ -2,7 +2,8 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="grid grid-flow-row auto-rows-max items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
+    <div className="flex min-h-4 w-full items-center justify-center p-6 md:p-10">
+    {/**<div className="grid grid-flow-row auto-rows-max items-center justify-items-center font-[family-name:var(--font-geist-sans)]"> */}
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
 
         <div className="flex gap-10 items-center flex-col sm:flex-row">
