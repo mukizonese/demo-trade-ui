@@ -20,15 +20,51 @@ import {
 } from '@tanstack/react-query'
 //import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useToast } from "@/hooks/use-toast"
+import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
+import { getCachedTradingUserId, clearTradingUserIdCache } from '@/lib/userMapping';
+import { authErrorHandler } from '@/lib/auth-error-handler';
 
 const queryClientBuyPopover = new QueryClient()
 
 export default function BuyActionPopover(props : any) {
+  const { onActionClick } = props; // Callback to close parent popup
+  const { user } = useSimpleAuth();
+  const { toast } = useToast();
+
+  const handleBuyClick = async () => {
+    // Proactively check auth service health before showing popover
+    const isHealthy = await authErrorHandler.checkAuthApiHealth();
+    if (!isHealthy) {
+      console.log('🔴 [BUY ACTION] Auth API is down, showing error');
+      const error = new Error('Authentication Service is currently unavailable');
+      error.name = 'TypeError';
+      authErrorHandler.handleAuthApiError(error, 'buy-action-click');
+      return; // Don't proceed with buy action
+    }
+    
+    // If auth service is healthy, show upgrade required toast
+    toast({
+      title: "Upgrade Required",
+      description: "Please sign in and upgrade to trader role to buy stocks. Click the Sign In button in the navigation to get started.",
+      variant: "default",
+    });
+  };
 
   return (
     <QueryClientProvider client={queryClientBuyPopover}>
       {/**<ReactQueryDevtools /> */}
-      <ActionPopoverQuery symbol={props.symbol} />
+      {user?.role === 'trader' ? (
+        <ActionPopoverQuery symbol={props.symbol} onActionClick={onActionClick} />
+      ) : (
+        <div className="flex items-center justify-center p-2">
+          <button 
+            className="text-xs text-blue-600 hover:text-blue-800 underline"
+            onClick={handleBuyClick}
+          >
+            B
+          </button>
+        </div>
+      )}
     </QueryClientProvider>
   )
 }
@@ -41,11 +77,29 @@ function formatNumbers(price : number, qty : number ){
 export function ActionPopoverQuery(props : any) {
 
     const { toast } = useToast()
+    const { user } = useSimpleAuth();
     const queryClientBuyPopover = useQueryClient()
     const symbol= props.symbol;
+    const { onActionClick } = props; // Callback to close parent popup
     const [quantity, setQuantity] = React.useState(1)
+    const [isPopoverOpen, setIsPopoverOpen] = React.useState(false)
 
-    var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
+    const handlePopoverTriggerClick = async () => {
+      // Proactively check auth service health before opening popover
+      const isHealthy = await authErrorHandler.checkAuthApiHealth();
+      if (!isHealthy) {
+        console.log('🔴 [BUY POPOVER] Auth API is down, showing error');
+        const error = new Error('Authentication Service is currently unavailable');
+        error.name = 'TypeError';
+        authErrorHandler.handleAuthApiError(error, 'buy-popover-trigger');
+        return; // Don't open popover
+      }
+      
+      // If auth service is healthy, open the popover
+      setIsPopoverOpen(true);
+    };
+
+    var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
       var fetchlatestpriceurl =  hosturl+ "/tradingzone/watchlist/latestprice/" + symbol;
       //console.log ("fetchlatestpriceurl > ",fetchlatestpriceurl)
 
@@ -74,16 +128,23 @@ export function ActionPopoverQuery(props : any) {
 
 
   return (
-      <Popover>
-        <PopoverTrigger >
-                    <Image
-                       src="/icons/buy-popover.svg"
-                       alt="Buy"
-                       width={15}
-                       height={15}
-                       priority
-                     />
-
+      <Popover open={isPopoverOpen} onOpenChange={(open) => {
+        setIsPopoverOpen(open);
+        if (!open) {
+          // Reset quantity when popover closes
+          setQuantity(1);
+        }
+      }}>
+        <PopoverTrigger asChild>
+          <button onClick={handlePopoverTriggerClick}>
+            <Image
+               src="/icons/buy-popover.svg"
+               alt="Buy"
+               width={15}
+               height={15}
+               priority
+             />
+          </button>
         </PopoverTrigger>
          <PopoverContent className="w-60 " sideOffset={5} alignOffset={2}>
                 <div className="grid gap-6">
@@ -119,12 +180,31 @@ export function ActionPopoverQuery(props : any) {
                    <div className="grid grid-cols-2 items-center gap-4">
                         <Button className="bg-blue-300"
                         //onClick={() =>  {  actionTrade(symbol, quantity ,"B") }}
-                        onClick={() =>  {
-                                  toast({
-                                            title: "Buy: Status ",
-                                            description: actionTrade(symbol, quantity ),
-                                            //description: "TEST TOAST",
-                                  })
+                        onClick={async () =>  {
+                                  // Close popover immediately when button is clicked
+                                  setIsPopoverOpen(false);
+                                  // Close parent popup if callback provided
+                                  if (onActionClick) {
+                                    onActionClick();
+                                  }
+                                  
+                                  try {
+                                    // Clear cache to ensure we get the current user's ID
+                                    clearTradingUserIdCache();
+                                    const userId = await getCachedTradingUserId();
+                                    console.log('🔍 [BUY] Using trading user ID:', userId);
+                                    
+                                    const result = await actionTrade(symbol, quantity, userId);
+                                    toast({
+                                              title: "Buy: Status ",
+                                              description: result.message,
+                                              //description: "TEST TOAST",
+                                    })
+                                  } catch (error) {
+                                    console.error('Failed to get trading user ID:', error);
+                                    // Use error handler instead of generic toast
+                                    authErrorHandler.handleMappingError(error, 'buy-action-popover');
+                                  }
                         }}
 
                         >
@@ -141,12 +221,12 @@ export function ActionPopoverQuery(props : any) {
 
 }
 
-function actionTrade(symbol: string, qty: number){
+async function actionTrade(symbol: string, qty: number, userId: number): Promise<{ success: boolean; message: string }> {
   //console.log("buyTrade " ,symbol )
   //console.log("qty " ,qty )
-      var actionStatus = true;
-      var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
-      var action_url =  hosturl + "/tradingzone/holdings/buy/" + symbol +"?qty=" + qty;
+      var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
+      
+      var action_url =  hosturl + "/tradingzone/holdings/buy/" + symbol +"?qty=" + qty + "&userId=" + userId;
 
       //console.log(" action_url : ",action_url);
 
@@ -157,19 +237,21 @@ function actionTrade(symbol: string, qty: number){
         //body: JSON.stringify(data) // Send the data in JSON format
       };
 
-      // Make the request
-      fetch(action_url, requestOptions)
-        .then(response => response.json()) // Parse the response as JSON
-        .then(data => actionStatus = data) // Do something with the data
-        .catch(error => console.error(error)); // Handle errors
-
-      //console.log("actionTrade status" ,actionStatus )
-      if(actionStatus){
-        return symbol + " Qty : " + qty +" > successfull.";
-      }else{
-        return symbol + " Qty :" + qty +" > failure.";
+      try {
+        // Make the request
+        const response = await fetch(action_url, requestOptions);
+        const data = await response.json();
+        
+        //console.log("actionTrade status" ,data )
+        if(data){
+          return { success: true, message: symbol + " Qty : " + qty +" > successfull." };
+        }else{
+          return { success: false, message: symbol + " Qty :" + qty +" > failure." };
+        }
+      } catch (error) {
+        console.error(error);
+        return { success: false, message: symbol + " Qty :" + qty +" > error occurred." };
       }
-
 }
 
 export { BuyActionPopover }

@@ -1,6 +1,6 @@
 "use client"
 
-import { WatchList, watchlistcolumns } from "./watchlist-columns"
+import { createWatchlistColumns } from "./watchlist-columns"
 import { DataTable } from "./data-table"
 
 import React, { StrictMode, useEffect, useState, useMemo  } from 'react';
@@ -33,212 +33,168 @@ import {
 } from "@/components/ui/select"
 
 import { LatestTradeDate } from "@/components/ui/tradeutil/trade-util"
-
+import { useWatchlist } from '@/hooks/useWatchlist';
+import { SharedAuthNav } from '@/components/ui/shared-auth-nav';
+import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
+import { getCachedTradingUserId, clearTradingUserIdCache } from '@/lib/userMapping';
 
 const queryClient = new QueryClient()
 
-export default function WatchListGrid() {
+interface WatchListGridProps {
+  currentWatchlistId: number;
+  onWatchlistChange: (watchlistId: number) => void;
+}
 
-  //const latestDate = latestTradeDate();
-  //console.log ("WatchListGrid latestTradeDate() > ")
-  //console.log ( latestDate)
-  //console.log ("WatchListGrid latestTradeDate() > ", latestDate, " latestDate.substring(0,9) > ", latestDate.substring(0,10))
-
+export default function WatchListGrid({ currentWatchlistId, onWatchlistChange }: WatchListGridProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools />
-      <WatchListGridQuery />
+      <WatchListGridQuery currentWatchlistId={currentWatchlistId} onWatchlistChange={onWatchlistChange} />
     </QueryClientProvider>
   )
 }
 
+function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchListGridProps) {
+    const [tradeDate, setTradeDate] = React.useState<Date>()
+    const [intervalMs, setIntervalMs] = React.useState(2000) // Default to 2 seconds
+    const [value, setValue] = React.useState('')
+    const [intervalSec, setIntervalSec] = React.useState(2000) // Default to 2 seconds
+    const { user } = useSimpleAuth();
 
+    // Auth is handled by SharedAuthNav component
+    const { symbols, getWatchlistTrades, isAuthenticated, userRole, removeSymbol } = useWatchlist(currentWatchlistId);
 
+    // Get user's holdings data
+    const [holdingsData, setHoldingsData] = React.useState<any>(null);
+    const [holdingsMap, setHoldingsMap] = React.useState<Map<string, number>>(new Map());
 
-
-function WatchListGridQuery() {
-
-    var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
-
-    const [tradeDate, setTradeDate] = React.useState<Date>(new Date("2024-12-02"))
-    const [tradeDateString, setTradeDateString] = useState("2024-12-02 00:00:00")
-
-    const latestDate = LatestTradeDate();
-    //console.log ("WatchListGridQuery latestTradeDate() > ")
-    //console.log ( latestDate)
-    //console.log ("WatchListGridQuery latestTradeDate() > ", latestDate, " latestDate.substring(0,10) > ", latestDate.substring(0,10))
-
-    const memoInit = useMemo(() => {
-        if (typeof latestDate === "string" && latestDate.length === 0) {
-                //console.log("The string is empty");
-                setTradeDate(new Date("2024-12-09"));
-                setTradeDateString("2024-12-09 00:00:00")
-            } else if (latestDate === null) {
-                //console.log("The string is null");
-                setTradeDate(new Date("2024-12-09"));
-                setTradeDateString("2024-12-09 00:00:00")
-            } else {
-                //console.log("The string is not empty or null");
-                setTradeDate(new Date(latestDate.substring(0,10)));
-                setTradeDateString(latestDate)
+    // Fetch holdings data
+    React.useEffect(() => {
+      const fetchHoldings = async () => {
+        try {
+          // Clear cache to ensure we get the current user's ID
+          clearTradingUserIdCache();
+          const userId = await getCachedTradingUserId();
+          console.log('🔍 [HOLDINGS] Fetching holdings for user ID:', userId);
+          
+          const hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
+          const response = await fetch(`${hosturl}/tradingzone/holdings/${userId}`, {
+            credentials: 'include'
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('🔍 [HOLDINGS] Holdings data received:', data);
+            setHoldingsData(data);
+            
+            // Create a map of symbol to quantity
+            const map = new Map<string, number>();
+            if (data.transactionlist) {
+              data.transactionlist.forEach((holding: any) => {
+                map.set(holding.tckrSymb, holding.avgQty || 0);
+              });
             }
-    }, [latestDate]);
+            console.log('🔍 [HOLDINGS] Holdings map created:', Object.fromEntries(map));
+            setHoldingsMap(map);
+          } else {
+            console.error('🔍 [HOLDINGS] Failed to fetch holdings, status:', response.status);
+          }
+        } catch (error) {
+          console.error('Failed to fetch holdings:', error);
+        }
+      };
 
-
-    const handleTradeDateChange = (selectedDate : Date)  => {
-        //cannot re-render
-         //console.log ("selectedDate > ", selectedDate)
-         setTradeDate(selectedDate)
-        var dateFormatted = format(toDate(selectedDate), "yyyy-MM-dd");
-        //console.log ("dateFormatted > ",dateFormatted)
-        var selectedDateString = dateFormatted + " 00:00:00"
-        //console.log ("selectedDateString > ",selectedDateString)
-        setTradeDateString(selectedDateString)
-    }
-
-      const queryClient = useQueryClient()
-      const [intervalMs, setIntervalMs] = React.useState(5000)
-      const [value, setValue] = React.useState('')
-      const [intervalSec, setIntervalSec] = React.useState(5000) //10000 is 10s
+      if (user && user.id) {
+        console.log('🔍 [HOLDINGS] User is authenticated, fetching holdings for:', user.email, 'role:', user.role);
+        fetchHoldings();
+      } else {
+        console.log('🔍 [HOLDINGS] User is not authenticated:', user?.role);
+      }
+    }, [user]);
 
     const handleIntervalStringToInt = (value: string) => {
         setIntervalSec(parseInt(value))
     }
 
+    const handleTradeDateChange = (selectedDate : Date)  => {
+        setTradeDate(selectedDate)
+    }
 
-      var fetchtradesurl =  hosturl+ "/tradingzone/watchlist/trades?cache=hash:watchlist&key=mukesh:1&date=" + tradeDateString;
-      //console.log ("fetchtradesurl > ",fetchtradesurl)
+    // Use the latest trade date if no date is selected
+    const tradeDateString = tradeDate ? format(tradeDate, "yyyy-MM-dd") : LatestTradeDate().substring(0, 10);
 
+    // Get watchlist trades using the new hook
+    const { 
+        data: serverData, 
+        isLoading, 
+        error, 
+        isFetching, 
+        status 
+    } = getWatchlistTrades;
 
-    const { isLoading, error, data: serverData , isFetching , status } = useQuery({
-        queryKey: ['trades', tradeDateString],
-/*         queryFn: () =>
-            fetch(fetchtradesurl).then((res) =>
-            res.json()
-            ) */
-           queryFn: () =>
-                  fetch(fetchtradesurl)
-                    .then(response => {
-                      if(response.ok) return response.json();
-                    })
-                    .then(data  => {
-                      return data
-                    })
- /*               queryFn: async (): Promise<Array<Trade>> => {
-                  const response = await fetch(fetchtradesurl)
-                  return await response.json()
-                } */
-//              queryFn:  async () => getTradeByDates(intervalDate)
-//                queryFn:  getTradeByDates(intervalDate)
-            ,
-            // Refetch the data every second
-            refetchInterval: intervalSec,
-            //enabled: true,
-      })
+    // Combine symbols with trade data
+    const combinedData = useMemo(() => {
+        if (!symbols || symbols.length === 0) {
+            return [];
+        }
 
-        //use memo shows empry data if set when api cals are in process of fetching
-        const data = useMemo(() => serverData ?? [], [serverData]);
-        /* console.log(data);
-          if (data === undefined) {
-            return <h1>Loading..as data not obtained.</h1>
-          } */
+        if (!serverData || serverData.length === 0) {
+            // Return placeholder data for symbols without trade data
+            return symbols.map((symbol: string) => ({
+                tckrSymb: symbol,
+                lastPric: 'N/A',
+                chngePric: 'N/A',
+                chngePricPct: 'N/A',
+                tradDt: new Date(),
+                prvsClsgPric: 'N/A'
+            }));
+        }
 
+        // Create a map of trade data by symbol
+        const tradesMap = new Map();
+        serverData.forEach((trade: any) => {
+            tradesMap.set(trade.tckrSymb, trade);
+        });
 
-        if (status === 'pending') return <h1>Loading...</h1>
-        if (status === 'error') return <span>Error: {error.message}</span>
-        //if (status === 'error') return <span>Error... </span>
+        // Combine symbols with their trade data
+        const combined = symbols.map((symbol: string) => {
+            const trade = tradesMap.get(symbol);
+            if (trade) {
+                // Return the trade data if available
+                return trade;
+            } else {
+                // Return a placeholder for symbols without trade data
+                return {
+                    tckrSymb: symbol,
+                    lastPric: 'N/A',
+                    chngePric: 'N/A',
+                    chngePricPct: 'N/A',
+                    tradDt: new Date(),
+                    prvsClsgPric: 'N/A'
+                };
+            }
+        });
 
-      return (
+        console.log('🔍 [GRID] Combined data:', combined);
+        return combined;
+    }, [symbols, serverData]);
 
-        <div >
+    if (status === 'pending') return <h1>Loading...</h1>
+    if (status === 'error') return <span>Error: {error.message}</span>
 
-{/**
-                <div className="grid  grid-cols-3 flex gap-2 items-left flex-col sm:flex-row">
-                    <div className="col-span-1 ">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[110px] justify-start text-left font-normal",
-                                !tradeDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {tradeDate ? format(tradeDate, "yyyy-MM-dd") : <span>Trade date</span>}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={tradeDate}
-                              //onSelect= { setTradeDate }
-                              onSelect= { (val , evt) => { if(val) handleTradeDateChange (val) }}
-                              //https://github.com/Hacker0x01/react-datepicker/issues/2971
-                              //DatePicker is a range hence 2 values
-                              //onSelect= {(val: Date) => handleTradeDateChange(val)}
-                              //onSelect={(ev) => setTradeDate(ev.target.value) }
-                              //onSelect={handleTradeDateChange}
-                              //onSelect= { handleTradeDateChange(tradeDate)}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                    </div>
-                    <div className="col-span-1 flex gap-3 items-left flex-col sm:flex-row py-0">
-                        <Select defaultValue="10000"
-                            //onValueChange={handleIntervalStringToInt}> value={intervalSec}
-                            onValueChange={(val) => handleIntervalStringToInt (val)}>
-                              <SelectTrigger className="w-[110px]">
-                                <SelectValue placeholder="60000" />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-md">
-                                <SelectItem value="3000" className="rounded-md">
-                                  3 Seconds
-                                </SelectItem>
-                                <SelectItem value="5000" className="rounded-md">
-                                  5 Seconds
-                                </SelectItem>
-                                <SelectItem value="10000" className="rounded-md">
-                                  10 Seconds
-                                </SelectItem>
-                                <SelectItem value="30000" className="rounded-md">
-                                  30 Seconds
-                                </SelectItem>
-                                <SelectItem value="60000" className="rounded-md">
-                                  1 Minute
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                           <label>
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                marginLeft: '.5rem',
-                                width: 8,
-                                height: 8,
-                                background: isFetching ? 'green' : 'transparent',
-                                transition: !isFetching ? 'all .3s ease' : 'none',
-                                borderRadius: '100%',
-                                transform: 'scale(2)',
-                              }}
-                            />
-                            </label>
-                    </div>
-                    <div className="col-span-1 ">
-
-                    </div>
-
-                </div>
- */}
-
-            <div>
-
-               {/* <DataTable columns={columns} data={data} />*/}
-                <DataTable columns={watchlistcolumns} data={data} />
+    return (
+        <div className="h-full flex flex-col">
+            {/* DataTable takes up all available space */}
+            <div className="flex-1 min-h-0">
+                <DataTable 
+                    columns={createWatchlistColumns(removeSymbol)} 
+                    data={combinedData} 
+                    onRemoveSymbol={removeSymbol}
+                    holdingsMap={holdingsMap}
+                />
             </div>
         </div>
-      );
+    )
 }
 
 export { WatchListGrid }

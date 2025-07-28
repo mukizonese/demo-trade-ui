@@ -22,7 +22,7 @@ export default function SymbolSearch<SearchProp>(props : any){
 
     const [selectedSymbol , setSelectedSymbol] =React.useState(props.initialSymbol)
 
-    var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
+    var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
     var fetchSymbolListurl =  hosturl + "/tradingzone/trades/symbols/";
     console.log(" fetchSymbolListurl : ",fetchSymbolListurl);
 

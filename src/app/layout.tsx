@@ -10,6 +10,10 @@ import { Back } from "@/components/ui/back"
 import { Footer } from "@/components/ui/footer"
 import Image from "next/image";
 import { Toaster } from "@/components/ui/toaster"
+import { ClientProviders } from "@/components/providers/ClientProviders"
+import { AuthNav } from "@/components/ui/auth-nav"
+import { AuthErrorToastManager } from "@/components/ui/auth-error-toast"
+import { AuthHealthMonitor } from "@/components/ui/auth-health-monitor"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,6 +37,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Holdings", href: "/holdings" },
   { name: "Architecture", href: "/architecture" },
+  //{ name: "Test Auth Errors", href: "/test-auth-errors" },
 ];
 
 export default function RootLayout({
@@ -51,69 +56,74 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                   >
-                    <div className="lg:pl-38">
+                    <ClientProviders>
+                      <div className="lg:pl-38">
 
-                      <div className="mx-auto max-w-9xl space-y-2 px-2 pt-20 lg:px-16 lg:py-2">
+                          <div className="mx-auto max-w-9xl space-y-2 px-2 pt-20 lg:px-16 lg:py-2">
 
-                          <div className="grid  grid-cols-3">
-                            <div><ThemeSwitch/></div>
-                            {/* <div><Navigation/></div> */}
+                              <div className="grid  grid-cols-3">
+                                <div><ThemeSwitch/></div>
+                                {/* <div><Navigation/></div> */}
 
-                            <div>
-                                <ul className="flex items-center justify-center gap-8">
-                                  {navigation.map((item) => (
-                                    <Link
-                                      key={item.href}
-                                      href={item.href}
-                                      className="text-md duration-500 hover:text-zinc-500"
-                                    >
-                                      {item.name}
-                                    </Link>
-                                  ))}
-                                </ul>
+                                <div>
+                                    <ul className="flex items-center justify-center gap-8">
+                                      {navigation.map((item) => (
+                                        <Link
+                                          key={item.href}
+                                          href={item.href}
+                                          className="text-md duration-500 hover:text-zinc-500"
+                                        >
+                                          {item.name}
+                                        </Link>
+                                      ))}
+                                    </ul>
+                                </div>
+
+                                <div className="flex gap-3 items-center justify-end">
+                                  <AuthNav />
+                                  <a
+                                    href="/mukizone"
+                                    target="_self"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <Image
+                                       className="dark:invert"
+                                       src="/icons/mukizone-com.svg"
+                                       alt="MukiZone"
+                                       width={100}
+                                       height={80}
+                                       priority
+                                     />
+                                  </a>
+                                </div>
+
+                              </div>
+
+
+                             <div className="rounded-lg bg-vc-border-gradient p-px ">
+                                 {/* <div className="rounded-lg p-3.5 lg:p-6">{children}</div>*/}
+                                      <div className="grid grid-cols-10 flex gap-2 items-left flex-col sm:flex-row">
+                                          <div className="col-span-2 ">
+                                                <WatchList/>
+                                          </div>
+                                          <div className="col-span-8 ">
+                                                <div className="rounded-lg p-3.5 lg:p-6">{children}</div>
+
+                                          </div>
+                                      </div>
+                                   </div>
+
+                              <div> <Toaster /></div>
+                              <AuthErrorToastManager />
+                              <AuthHealthMonitor />
+                            <div className="grid  grid-cols-2">
+                              <div><Back/></div>
+                              <div><Footer/></div>
                             </div>
 
-                            <div className="flex gap-3 items-right flex-col sm:flex-row">
-                              <a
-                                href="/mukizone"
-                                target="_self"
-                                rel="noopener noreferrer"
-                              >
-                                <Image
-                                   className="dark:invert"
-                                   src="/icons/mukizone-com.svg"
-                                   alt="MukiZone"
-                                   width={100}
-                                   height={80}
-                                   priority
-                                 />
-                              </a>
                             </div>
-
-                          </div>
-
-
-                           <div className="rounded-lg bg-vc-border-gradient p-px ">
-                               {/* <div className="rounded-lg p-3.5 lg:p-6">{children}</div>*/}
-                                    <div className="grid grid-cols-10 flex gap-2 items-left flex-col sm:flex-row">
-                                        <div className="col-span-2 ">
-                                              <WatchList/>
-                                        </div>
-                                        <div className="col-span-8 ">
-                                              <div className="rounded-lg p-3.5 lg:p-6">{children}</div>
-
-                                        </div>
-                                    </div>
-                             </div>
-
-                            <div> <Toaster /></div>
-                          <div className="grid  grid-cols-2">
-                            <div><Back/></div>
-                            <div><Footer/></div>
-                          </div>
-
-                          </div>
-                    </div>
+                      </div>
+                    </ClientProviders>
         </ThemeProvider>
       </body>
     </html>

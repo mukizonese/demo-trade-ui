@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import {BuyActionPopover} from "@/components/ui/action-popover/buy-action-popover"
+import {SellActionPopover} from "@/components/ui/action-popover/sell-action-popover"
+import { X, TrendingUp, TrendingDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 export type WatchList = {
    tradDt: Date
@@ -23,7 +26,8 @@ export type WatchList = {
    chngePricPct: number
 }
 
-export const watchlistcolumns: ColumnDef<WatchList>[] = [
+export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void): ColumnDef<WatchList>[] => {
+  return [
 /*
     {
     accessorKey: "tradDt",
@@ -52,6 +56,13 @@ export const watchlistcolumns: ColumnDef<WatchList>[] = [
     {
       accessorKey: "lastPric",
       header: "LTP",
+      cell: ({ row }) => {
+        const price = row.getValue("lastPric");
+        if (price === 0 || price === null || price === undefined) {
+          return <span className="text-gray-400">N/A</span>;
+        }
+        return price;
+      }
     },
     {
         accessorKey: "chngePric",
@@ -59,11 +70,14 @@ export const watchlistcolumns: ColumnDef<WatchList>[] = [
         size: 50,
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("chngePric"))
-            if(cp < 0 ){
+            if (cp === 0 || isNaN(cp)) {
+                return <span className="text-gray-400">N/A</span>;
+            } else if(cp < 0 ){
                 return  <p className="text-red-600">{cp}</p> ;
             } else if (cp > 0 ){
                 return  <p className="text-green-700">{cp}</p>  ;
             }
+            return <span className="text-gray-400">N/A</span>;
         }
     },
     {
@@ -72,21 +86,18 @@ export const watchlistcolumns: ColumnDef<WatchList>[] = [
       size: 30,
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("chngePricPct"))
-            if(cp < 0 ){
+            if (cp === 0 || isNaN(cp)) {
+                return <span className="text-gray-400">N/A</span>;
+            } else if(cp < 0 ){
                 return  <p className="text-red-600">{cp}</p> ;
             } else if (cp > 0 ){
                 return  <p className="text-green-700">{cp}</p>  ;
             }
+            return <span className="text-gray-400">N/A</span>;
         }
     },
-      {
-        id: "actions",
-        cell: ({ row }) => {
-          const symb = row.getValue("tckrSymb");
+  ];
+};
 
-          return (
-            <BuyActionPopover symbol={symb}/>
-          )
-        },
-      },
-]
+// For backward compatibility
+export const watchlistcolumns = createWatchlistColumns();

@@ -67,7 +67,7 @@ export function TradeChart() {
 
         //const host = config.fetchHost;
         //const port = config.fetchPort;
-        var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
+        var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
 
         var url =  hosturl + "/tradingzone/tradeshistory";
         var fetchurl = url + "/" + symbol + "/" + timeRange;

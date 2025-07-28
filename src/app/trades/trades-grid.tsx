@@ -27,7 +27,8 @@ export default function TradesGrid() {
    //const data = await getTradesData()
    //const data = await getServerSideProps();
 
-    var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
+    var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
+
     const [tradeDate, setTradeDate] = React.useState<Date>(new Date("2024-12-02"))
     const [tradeDateString, setTradeDateString] = useState("2024-12-02 00:00:00")
 

@@ -8,7 +8,7 @@ export function LatestTradeDate(){
     const [latestDate , setLatestDate] =React.useState("")
     //const [latestDate , setLatestDate] = ""
 
-    var hosturl = process.env.NEXT_PUBLIC_FETCH_URL;
+    var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
     var fetchurl =  hosturl + "/tradingzone/trades/latestdate/";
     //console.log(" fetchlatesttradedateurl : ",fetchurl);
 
