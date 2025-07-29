@@ -192,7 +192,7 @@ export function ActionPopoverQuery(props : any) {
                                     // Clear cache to ensure we get the current user's ID
                                     clearTradingUserIdCache();
                                     const userId = await getCachedTradingUserId();
-                                    console.log('🔍 [BUY] Using trading user ID:', userId);
+                                    //console.log('🔍 [BUY] Using trading user ID:', userId);
                                     
                                     const result = await actionTrade(symbol, quantity, userId);
                                     toast({

@@ -17,7 +17,7 @@ export async function getTradingUserId(): Promise<number> {
   try {
     const authApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8050';
     
-    console.log('🔍 [USER MAPPING] Fetching trading user ID from:', `${authApiUrl}/api/mapping/trading-user-id`);
+    //console.log('🔍 [USER MAPPING] Fetching trading user ID from:', `${authApiUrl}/api/mapping/trading-user-id`);
     
     const response = await fetch(`${authApiUrl}/api/mapping/trading-user-id`, {
       credentials: 'include', // Include cookies for authentication
@@ -31,7 +31,7 @@ export async function getTradingUserId(): Promise<number> {
     }
 
     const data: UserMapping = await response.json();
-    console.log('🔍 [USER MAPPING] User mapping response:', data);
+    //console.log('🔍 [USER MAPPING] User mapping response:', data);
     
     return data.trading_user_id;
   } catch (error) {
@@ -57,7 +57,7 @@ export async function getCachedTradingUserId(): Promise<number> {
   
   // Return cached value if still valid
   if (cachedTradingUserId && now < cacheExpiry) {
-    console.log('🔍 [USER MAPPING] Returning cached trading user ID:', cachedTradingUserId);
+    //console.log('🔍 [USER MAPPING] Returning cached trading user ID:', cachedTradingUserId);
     return cachedTradingUserId;
   }
   
@@ -77,7 +77,7 @@ export async function getCachedTradingUserId(): Promise<number> {
  * Clear the cached trading user ID
  */
 export function clearTradingUserIdCache(): void {
-  console.log('🔍 [USER MAPPING] Clearing trading user ID cache');
+  //console.log('🔍 [USER MAPPING] Clearing trading user ID cache');
   cachedTradingUserId = null;
   cacheExpiry = 0;
 } 

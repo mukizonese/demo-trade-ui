@@ -74,10 +74,10 @@ function HoldingsExample({ userId }: { userId?: number }) {
 
       // Get the authenticated user's trading user ID
       React.useEffect(() => {
-        console.log('🔍 [HOLDINGS GRID] useEffect triggered with user:', user);
-        console.log('🔍 [HOLDINGS GRID] user?.role:', user?.role);
-        console.log('🔍 [HOLDINGS GRID] user?.id:', user?.id);
-        console.log('🔍 [HOLDINGS GRID] loading:', loading);
+        //console.log('🔍 [HOLDINGS GRID] useEffect triggered with user:', user);
+        //console.log('🔍 [HOLDINGS GRID] user?.role:', user?.role);
+        //console.log('🔍 [HOLDINGS GRID] user?.id:', user?.id);
+        //console.log('🔍 [HOLDINGS GRID] loading:', loading);
         
         // Don't proceed if still loading
         if (loading) {
@@ -87,17 +87,17 @@ function HoldingsExample({ userId }: { userId?: number }) {
         
         // Allow all authenticated users (including guests) to view holdings
         const isAuthenticated = user && user.id;
-        console.log('🔍 [HOLDINGS GRID] Is authenticated:', isAuthenticated, 'User email:', user?.email);
+        //console.log('🔍 [HOLDINGS GRID] Is authenticated:', isAuthenticated, 'User email:', user?.email);
         
         const getTradingUserId = async () => {
           try {
-            console.log('🔍 [HOLDINGS GRID] Current user:', user);
+            //console.log('🔍 [HOLDINGS GRID] Current user:', user);
             // Allow all authenticated users to view holdings, including guests
             if (user && user.id && isAuthenticated) {
               // Clear cache to ensure we get the current user's ID
               clearTradingUserIdCache();
               const tradingUserId = await getCachedTradingUserId();
-              console.log('🔍 [HOLDINGS GRID] Using trading user ID:', tradingUserId, 'for user:', user.email, 'user.id:', user.id, 'role:', user.role);
+              //console.log('🔍 [HOLDINGS GRID] Using trading user ID:', tradingUserId, 'for user:', user.email, 'user.id:', user.id, 'role:', user.role);
               setEffectiveUserId(tradingUserId);
               
               // Invalidate React Query cache for holdings
@@ -121,18 +121,18 @@ function HoldingsExample({ userId }: { userId?: number }) {
       }, [user?.id, user?.email, user?.role, userId, loading, queryClientHoldings, user]); // Add missing dependencies
       
       const fetchholdingssurl = hosturl ? hosturl + "/tradingzone/holdings/" + effectiveUserId : "";
-      console.log("🔍 [HOLDINGS GRID] fetchholdingssurl > ", fetchholdingssurl);
+      //console.log("🔍 [HOLDINGS GRID] fetchholdingssurl > ", fetchholdingssurl);
 
     const { isLoading, error, data: serverData , isFetching , status } = useQuery({
         queryKey: ['holdings', effectiveUserId, user?.email], // Add user email to force refetch
            queryFn: async () => {
-                  console.log('🔍 [HOLDINGS GRID] Fetching holdings for user ID:', effectiveUserId, 'URL:', fetchholdingssurl);
+                  //console.log('🔍 [HOLDINGS GRID] Fetching holdings for user ID:', effectiveUserId, 'URL:', fetchholdingssurl);
                   const response = await fetch(fetchholdingssurl);
                   if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                   }
                   const data = await response.json();
-                  console.log("🔍 [HOLDINGS GRID] holdings data > ", data);
+                  //console.log("🔍 [HOLDINGS GRID] holdings data > ", data);
                   return data;
             },
             refetchInterval: intervalSec,
@@ -203,7 +203,7 @@ function HoldingsExample({ userId }: { userId?: number }) {
 
         // Debug function to clear all caches
         const debugClearCaches = () => {
-          console.log('🔍 [DEBUG] Clearing all caches...');
+          //console.log('🔍 [DEBUG] Clearing all caches...');
           clearTradingUserIdCache();
           queryClientHoldings.clear();
           window.location.reload();

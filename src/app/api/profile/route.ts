@@ -18,7 +18,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.log('Profile update request:', { email, role, roles, hasNewPassword: !!newPassword });
+    //console.log('Profile update request:', { email, role, roles, hasNewPassword: !!newPassword });
 
     // Update role using the existing auth API
     if (role) {
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
       }
 
       const roleUpdateResult = await roleUpdateResponse.json();
-      console.log('Role update successful:', roleUpdateResult);
+      //console.log('Role update successful:', roleUpdateResult);
     }
 
     // TODO: Handle password change if newPassword is provided

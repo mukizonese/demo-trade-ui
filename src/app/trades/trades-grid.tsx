@@ -34,18 +34,18 @@ export default function TradesGrid() {
 
     const handleTradeDateChange = (selectedDate : Date)  => {
 
-         console.log ("selectedDate > ", selectedDate)
+        //console.log ("selectedDate > ", selectedDate)
          setTradeDate(selectedDate)
         var dateFormatted = format(toDate(selectedDate), "yyyy-MM-dd");
-        console.log ("dateFormatted > ",dateFormatted)
+        //console.log ("dateFormatted > ",dateFormatted)
         var selectedDateString = dateFormatted + " 00:00:00"
-        console.log ("selectedDateString > ",selectedDateString)
+        //console.log ("selectedDateString > ",selectedDateString)
         setTradeDateString(selectedDateString)
         fetchTradesData();
     }
 
       var fetchtradesurl =  hosturl + "/tradingzone/tradesByDate?date=" + tradeDateString + "&live=false";
-      console.log ("fetchtradesurl > ",fetchtradesurl)
+      //console.log ("fetchtradesurl > ",fetchtradesurl)
 
       const [data, setTradesData] = useState([])
 

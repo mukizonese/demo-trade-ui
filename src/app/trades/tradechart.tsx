@@ -39,7 +39,7 @@ export function TradeChart() {
       setSelectedSymbol(t);
    }
 
-    console.log(" selectedSymbol in tradechart : ",selectedSymbol);
+    //console.log(" selectedSymbol in tradechart : ",selectedSymbol);
 
     const [chartSymbol, setChartSymbol] = useState([])
 
@@ -72,7 +72,7 @@ export function TradeChart() {
         var url =  hosturl + "/tradingzone/tradeshistory";
         var fetchurl = url + "/" + symbol + "/" + timeRange;
 
-        console.log(" fetchurl in TradeChart : ",fetchurl);
+        //console.log(" fetchurl in TradeChart : ",fetchurl);
 
         //fetch("http://localhost:8090/tradeshistory/HDFCBANK/2024-10-16")
         fetch(fetchurl)

@@ -23,14 +23,14 @@ export function useWatchlist(watchlistId: number = 1) {
         return [];
       }
 
-      console.log('🔍 [WATCHLIST] Fetching symbols for watchlist:', watchlistId);
+      //console.log('🔍 [WATCHLIST] Fetching symbols for watchlist:', watchlistId);
       const response = await fetch(`${hosturl}/tradingzone/watchlist/my/symbols?watchlistId=${watchlistId}`, {
         credentials: 'include',
       });
       
       if (response.ok) {
         const symbols = await response.json();
-        console.log('🔍 [WATCHLIST] Retrieved symbols:', symbols);
+        //console.log('🔍 [WATCHLIST] Retrieved symbols:', symbols);
         
         // Check if these are default symbols (first time loading) - only for watchlist ID 1
         const defaultSymbols = ['CHEMPLASTS', 'HDFCBANK', 'RELIANCE', 'SWIGGY', 'INFY'];
@@ -38,7 +38,7 @@ export function useWatchlist(watchlistId: number = 1) {
         
         if (watchlistId === 1 && hasDefaultSymbols && symbols.length === defaultSymbols.length && !defaultSymbolsLoaded) {
           setDefaultSymbolsLoaded(true);
-          console.log('🔍 [WATCHLIST] Default symbols loaded for first time on watchlist 1');
+          //console.log('🔍 [WATCHLIST] Default symbols loaded for first time on watchlist 1');
         }
         
         return symbols;
@@ -159,10 +159,10 @@ export function useWatchlist(watchlistId: number = 1) {
         return [];
       }
 
-      console.log('🔍 [TRADES] Current user:', user);
-      console.log('🔍 [TRADES] User email:', user.email);
-      console.log('🔍 [TRADES] User role:', user.role);
-      console.log('🔍 [TRADES] Trade date:', tradeDate);
+      //console.log('🔍 [TRADES] Current user:', user);
+      //console.log('🔍 [TRADES] User email:', user.email);
+      //console.log('🔍 [TRADES] User role:', user.role);
+      //console.log('🔍 [TRADES] Trade date:', tradeDate);
 
       // Use the authenticated endpoint
       const response = await fetch(`${hosturl}/tradingzone/watchlist/my/trades?date=${tradeDate}&watchlistId=${watchlistId}`, {
@@ -171,7 +171,7 @@ export function useWatchlist(watchlistId: number = 1) {
       
       if (response.ok) {
         const trades = await response.json();
-        console.log('🔍 [TRADES] Retrieved trades:', trades);
+        //console.log('🔍 [TRADES] Retrieved trades:', trades);
         return trades;
       }
       
@@ -213,7 +213,7 @@ export function useWatchlist(watchlistId: number = 1) {
       });
 
       await Promise.all(pricePromises);
-      console.log('🔍 [LATEST PRICES] Retrieved prices:', pricesMap);
+      //console.log('🔍 [LATEST PRICES] Retrieved prices:', pricesMap);
       return pricesMap;
     },
     enabled: !!hosturl && !!symbols && symbols.length > 0,

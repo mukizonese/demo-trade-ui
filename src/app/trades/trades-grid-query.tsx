@@ -77,12 +77,12 @@ function Example() {
 
     const handleTradeDateChange = (selectedDate : Date)  => {
 
-         console.log ("selectedDate > ", selectedDate)
+         //console.log ("selectedDate > ", selectedDate)
          setTradeDate(selectedDate)
         var dateFormatted = format(toDate(selectedDate), "yyyy-MM-dd");
-        console.log ("dateFormatted > ",dateFormatted)
+        //console.log ("dateFormatted > ",dateFormatted)
         var selectedDateString = dateFormatted + " 00:00:00"
-        console.log ("selectedDateString > ",selectedDateString)
+        //console.log ("selectedDateString > ",selectedDateString)
         setTradeDateString(selectedDateString)
     }
 
@@ -97,7 +97,7 @@ function Example() {
 
 
       var fetchtradesurl =  hosturl + "/tradingzone/tradesByDate?date=" + tradeDateString + "&live=true";
-      console.log ("fetchtradesurl > ",fetchtradesurl)
+      //console.log ("fetchtradesurl > ",fetchtradesurl)
 
 
     const { isLoading, error, data: serverData , isFetching , status } = useQuery({

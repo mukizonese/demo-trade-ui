@@ -106,7 +106,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
 
   const autoGuestLogin = useCallback(async () => {
     try {
-      console.log('🔄 Attempting auto guest login...');
+      //console.log('🔄 Attempting auto guest login...');
       const result = await authApiClient.guestLogin();
       if (result.success && result.user) {
         console.log('✅ Auto guest login successful:', result.user);
@@ -155,7 +155,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
 
   const loginAsGuest = useCallback(async () => {
     try {
-      console.log('🔄 Manual guest login...');
+      //console.log('🔄 Manual guest login...');
       const result = await authApiClient.guestLogin();
       if (result.success && result.user) {
         console.log('✅ Manual guest login successful:', result.user);

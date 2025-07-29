@@ -49,7 +49,7 @@ export class AuthServiceErrorHandler {
         this.lastError.type === error.type && 
         this.lastError.message === error.message &&
         (now - this.lastErrorTime) < this.ERROR_DEDUPLICATION_WINDOW) {
-      console.log('🔴 [AUTH ERROR] Duplicate error suppressed:', error.type);
+      //console.log('🔴 [AUTH ERROR] Duplicate error suppressed:', error.type);
       return;
     }
     
@@ -166,7 +166,7 @@ export class AuthServiceErrorHandler {
       
       // Consider rate limit (429) as healthy since it means the service is responding
       const isHealthy = response.ok || response.status === 429;
-      console.log('🔍 [AUTH HEALTH] Auth API health check:', isHealthy ? 'HEALTHY' : 'UNHEALTHY', 'Status:', response.status);
+      //console.log('🔍 [AUTH HEALTH] Auth API health check:', isHealthy ? 'HEALTHY' : 'UNHEALTHY', 'Status:', response.status);
       
       // If we hit rate limit, log it but don't treat as error
       if (response.status === 429) {

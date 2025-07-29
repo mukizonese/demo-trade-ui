@@ -21,12 +21,12 @@ export function AuthHealthMonitor() {
     const shouldRunHealthCheck = isAuthenticated || wasAuthenticated;
     
     // Only log when status changes to reduce console spam
-    console.log('🔍 [PAGE HEALTH MONITOR] Status:', {
-      isAuthenticated,
-      wasAuthenticated,
-      shouldRunHealthCheck,
-      userEmail: user?.email
-    });
+    //console.log('🔍 [PAGE HEALTH MONITOR] Status:', {
+    //  isAuthenticated,
+    //  wasAuthenticated,
+    //  shouldRunHealthCheck,
+    //  userEmail: user?.email
+    //});
     
     if (shouldRunHealthCheck) {
       // Clear any existing interval
@@ -36,9 +36,9 @@ export function AuthHealthMonitor() {
       
       // Start new health check interval (every 60 seconds to avoid rate limits)
       const interval = setInterval(() => {
-        console.log('🔍 [PAGE HEALTH MONITOR] Running health check...');
+        //console.log('🔍 [PAGE HEALTH MONITOR] Running health check...');
         authErrorHandler.checkAuthApiHealth().then(isHealthy => {
-          console.log('🔍 [PAGE HEALTH MONITOR] Health check result:', isHealthy);
+          //console.log('🔍 [PAGE HEALTH MONITOR] Health check result:', isHealthy);
           if (!isHealthy) {
             console.log('🔍 [PAGE HEALTH MONITOR] Auth API is down, showing error');
             const error = new Error('Authentication Service is currently unavailable');
@@ -53,9 +53,9 @@ export function AuthHealthMonitor() {
       setHealthCheckInterval(interval);
       
       // Also do an immediate health check to test
-      console.log('🔍 [PAGE HEALTH MONITOR] Running immediate health check...');
+      //console.log('🔍 [PAGE HEALTH MONITOR] Running immediate health check...');
       authErrorHandler.checkAuthApiHealth().then(isHealthy => {
-        console.log('🔍 [PAGE HEALTH MONITOR] Immediate health check result:', isHealthy);
+        //console.log('🔍 [PAGE HEALTH MONITOR] Immediate health check result:', isHealthy);
       }).catch(error => {
         console.error('🔍 [PAGE HEALTH MONITOR] Immediate health check failed:', error);
       });
