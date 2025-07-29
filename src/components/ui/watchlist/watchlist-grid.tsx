@@ -62,7 +62,7 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
     const { user } = useSimpleAuth();
 
     // Auth is handled by SharedAuthNav component
-    const { symbols, getWatchlistTrades, isAuthenticated, userRole, removeSymbol } = useWatchlist(currentWatchlistId);
+    const { symbols, getWatchlistTrades, getLatestPrices, isAuthenticated, userRole, removeSymbol } = useWatchlist(currentWatchlistId);
 
     // Get user's holdings data
     const [holdingsData, setHoldingsData] = React.useState<any>(null);
@@ -132,6 +132,12 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
         status 
     } = getWatchlistTrades;
 
+    // Get latest prices for fallback
+    const { 
+        data: latestPrices = {}, 
+        isLoading: isLoadingPrices 
+    } = getLatestPrices;
+
     // Combine symbols with trade data
     const combinedData = useMemo(() => {
         if (!symbols || symbols.length === 0) {
@@ -142,11 +148,11 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
             // Return placeholder data for symbols without trade data
             return symbols.map((symbol: string) => ({
                 tckrSymb: symbol,
-                lastPric: 'N/A',
-                chngePric: 'N/A',
-                chngePricPct: 'N/A',
+                lastPric: null,
+                chngePric: null,
+                chngePricPct: null,
                 tradDt: new Date(),
-                prvsClsgPric: 'N/A'
+                prvsClsgPric: null
             }));
         }
 
@@ -163,23 +169,37 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
                 // Return the trade data if available
                 return trade;
             } else {
-                // Return a placeholder for symbols without trade data
-                return {
-                    tckrSymb: symbol,
-                    lastPric: 'N/A',
-                    chngePric: 'N/A',
-                    chngePricPct: 'N/A',
-                    tradDt: new Date(),
-                    prvsClsgPric: 'N/A'
-                };
+                // Try to get latest price data as fallback
+                const latestPrice = latestPrices[symbol];
+                if (latestPrice && latestPrice.lastPric) {
+                    // Use latest price data if available
+                    return {
+                        tckrSymb: symbol,
+                        lastPric: latestPrice.lastPric,
+                        chngePric: latestPrice.chngePric || 0,
+                        chngePricPct: latestPrice.chngePricPct || 0,
+                        tradDt: new Date(),
+                        prvsClsgPric: latestPrice.prvsClsgPric || 0
+                    };
+                } else {
+                    // Return a placeholder for symbols without any data
+                    return {
+                        tckrSymb: symbol,
+                        lastPric: null,
+                        chngePric: null,
+                        chngePricPct: null,
+                        tradDt: new Date(),
+                        prvsClsgPric: null
+                    };
+                }
             }
         });
 
         console.log('🔍 [GRID] Combined data:', combined);
         return combined;
-    }, [symbols, serverData]);
+    }, [symbols, serverData, latestPrices]);
 
-    if (status === 'pending') return <h1>Loading...</h1>
+    if (status === 'pending' || isLoadingPrices) return <h1>Loading...</h1>
     if (status === 'error') return <span>Error: {error.message}</span>
 
     return (

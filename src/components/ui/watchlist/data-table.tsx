@@ -76,7 +76,8 @@ export function DataTable<TData, TValue>({
   // Cleanup timeouts on unmount
   React.useEffect(() => {
     return () => {
-      hideTimeoutRefs.current.forEach(timeout => {
+      const timeouts = Array.from(hideTimeoutRefs.current.values());
+      timeouts.forEach(timeout => {
         clearTimeout(timeout);
       });
       hideTimeoutRefs.current.clear();

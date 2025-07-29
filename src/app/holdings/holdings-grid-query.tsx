@@ -85,14 +85,14 @@ function HoldingsExample({ userId }: { userId?: number }) {
           return;
         }
         
-        // Check if user is actually authenticated (not guest)
-        const isAuthenticated = user && user.email && !user.email.includes('guest');
+        // Allow all authenticated users (including guests) to view holdings
+        const isAuthenticated = user && user.id;
         console.log('🔍 [HOLDINGS GRID] Is authenticated:', isAuthenticated, 'User email:', user?.email);
         
         const getTradingUserId = async () => {
           try {
             console.log('🔍 [HOLDINGS GRID] Current user:', user);
-            // Allow all authenticated users to view holdings, not just traders
+            // Allow all authenticated users to view holdings, including guests
             if (user && user.id && isAuthenticated) {
               // Clear cache to ensure we get the current user's ID
               clearTradingUserIdCache();
@@ -118,7 +118,7 @@ function HoldingsExample({ userId }: { userId?: number }) {
           console.error('🔍 [HOLDINGS GRID] Error in getTradingUserId:', error);
           // The error will be handled by the error handler and shown as a toast
         });
-      }, [user?.id, user?.email, user?.role, userId, loading]); // Remove healthCheckInterval from dependencies
+      }, [user?.id, user?.email, user?.role, userId, loading, queryClientHoldings, user]); // Add missing dependencies
       
       const fetchholdingssurl = hosturl ? hosturl + "/tradingzone/holdings/" + effectiveUserId : "";
       console.log("🔍 [HOLDINGS GRID] fetchholdingssurl > ", fetchholdingssurl);
@@ -163,11 +163,32 @@ function HoldingsExample({ userId }: { userId?: number }) {
 
         // Handle error states
         if (error) {
+            console.error('🔍 [HOLDINGS GRID] Error fetching holdings:', error);
+            
+            // Check if it's a 502 Bad Gateway error (service not ready)
+            if (error.message && error.message.includes('502')) {
+                return (
+                    <div className="text-center p-4">
+                        <div className="text-orange-600 mb-2">⚠️ Services Starting Up</div>
+                        <div className="text-sm text-gray-600 mb-4">
+                            The trading services are currently starting up. Please wait a moment and refresh the page.
+                        </div>
+                        <button 
+                            onClick={() => window.location.reload()}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        >
+                            Refresh Page
+                        </button>
+                    </div>
+                );
+            }
+            
             return (
                 <div className="text-center p-4">
-                    <div className="text-red-600 mb-2">Error loading holdings:</div>
-                    <div className="text-sm text-gray-600">{error?.message || 'Unknown error occurred'}</div>
-                    <div className="text-xs text-gray-500 mt-2">URL: {fetchholdingssurl}</div>
+                    <div className="text-red-600 mb-2">Error loading holdings</div>
+                    <div className="text-sm text-gray-600">
+                        {error.message || 'An unexpected error occurred'}
+                    </div>
                 </div>
             );
         }
@@ -195,7 +216,7 @@ function HoldingsExample({ userId }: { userId?: number }) {
                 {isGuest && (
                   <div className="text-center p-2 bg-blue-50 border border-blue-200 rounded-md">
                     <span className="text-sm text-blue-600">
-                      👀 Guest Mode - Upgrade to Trader for personalized holdings
+                      👀 Guest Mode - You can view holdings but cannot buy/sell. Upgrade to Trader for trading.
                     </span>
                   </div>
                 )}

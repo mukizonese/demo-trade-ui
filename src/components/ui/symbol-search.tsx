@@ -1,5 +1,5 @@
 "use client"
-import React, { StrictMode, useEffect, useState, useMemo ,forwardRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Check, ChevronsUpDown } from "lucide-react"
 import Image from "next/image";
 import { cn } from "@/lib/utils"
@@ -20,7 +20,8 @@ import {
 
 export default function SymbolSearch<SearchProp>(props : any){
 
-    const [selectedSymbol , setSelectedSymbol] =React.useState(props.initialSymbol)
+    const { initialSymbol, updateParentSymbol } = props;
+    const [selectedSymbol , setSelectedSymbol] =React.useState(initialSymbol)
 
     var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
     var fetchSymbolListurl =  hosturl + "/tradingzone/trades/symbols/";
@@ -28,24 +29,24 @@ export default function SymbolSearch<SearchProp>(props : any){
 
     const [symbolsData, setSymbolsData] = useState([])
 
-        const fetchSymbols = () => {
-            fetch(fetchSymbolListurl)
-              .then(response => {
-                return response.json()
-              })
-              .then(data => {
-                setSymbolsData(data)
-              })
-        }
+    const fetchSymbols = useCallback(() => {
+        fetch(fetchSymbolListurl)
+          .then(response => {
+            return response.json()
+          })
+          .then(data => {
+            setSymbolsData(data)
+          })
+    }, [fetchSymbolListurl])
 
        useEffect(() => {
-          props.updateParentSymbol(selectedSymbol)
-       }, [selectedSymbol]);
+          updateParentSymbol(selectedSymbol)
+       }, [selectedSymbol, updateParentSymbol]);
 
 
         useEffect(() => {
             fetchSymbols()
-        }, [])
+        }, [fetchSymbols])
 
     const symbols = symbolsData;
     const [open, setOpen] = React.useState(false)

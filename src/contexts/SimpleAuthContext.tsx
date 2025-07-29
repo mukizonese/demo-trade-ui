@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { authErrorHandler } from '@/lib/auth-error-handler';
 
 interface AuthUser {
@@ -74,7 +74,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     return false;
   });
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const response = await authApiClient.getCurrentUser();
       if (response.success && response.user) {
@@ -102,9 +102,9 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [skipGuestLogin]);
 
-  const autoGuestLogin = async () => {
+  const autoGuestLogin = useCallback(async () => {
     try {
       console.log('🔄 Attempting auto guest login...');
       const result = await authApiClient.guestLogin();
@@ -117,13 +117,13 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('❌ Auto guest login error:', error);
     }
-  };
+  }, []);
 
-  const refreshUser = () => {
+  const refreshUser = useCallback(() => {
     checkAuth();
-  };
+  }, [checkAuth]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       const authApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8050';
       const response = await fetch(`${authApiUrl}/api/auth/signout`, {
@@ -151,9 +151,9 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       setSkipGuestLogin(true);
       localStorage.setItem('skipGuestLogin', 'true'); // Persist in localStorage
     }
-  };
+  }, []);
 
-  const loginAsGuest = async () => {
+  const loginAsGuest = useCallback(async () => {
     try {
       console.log('🔄 Manual guest login...');
       const result = await authApiClient.guestLogin();
@@ -168,11 +168,11 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('❌ Manual guest login error:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   return (
     <SimpleAuthContext.Provider value={{ user, loading, accountSuspended, authError, refreshUser, signOut, loginAsGuest }}>

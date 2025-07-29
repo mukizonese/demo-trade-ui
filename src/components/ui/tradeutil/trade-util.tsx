@@ -1,5 +1,5 @@
 "use client"
-import React, { StrictMode, useEffect, useState, useMemo  } from 'react';
+import React, { StrictMode, useEffect, useState, useMemo, useCallback  } from 'react';
 
 //export const latestTradeDate = LatestDate();
 
@@ -12,7 +12,7 @@ export function LatestTradeDate(){
     var fetchurl =  hosturl + "/tradingzone/trades/latestdate/";
     //console.log(" fetchlatesttradedateurl : ",fetchurl);
 
-        const fetchData = () => {
+        const fetchData = useCallback(() => {
             fetch(fetchurl)
               .then(response => {
                 return response.json()
@@ -20,10 +20,11 @@ export function LatestTradeDate(){
               .then(data => {
                 setLatestDate(data)
               })
-        }
+        }, [fetchurl])
+
          useEffect(() => {
             fetchData()
-        }, [])
+        }, [fetchData])
 
       //console.log(" latestDate : ",latestDate);
       return latestDate;

@@ -58,7 +58,7 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
       header: "LTP",
       cell: ({ row }) => {
         const price = row.getValue("lastPric");
-        if (price === 0 || price === null || price === undefined) {
+        if (price === 0 || price === null || price === undefined || price === 'N/A') {
           return <span className="text-gray-400">N/A</span>;
         }
         return price;
@@ -69,7 +69,11 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
         header: "Chg",
         size: 50,
         cell: ({ row }) => {
-            const cp = parseFloat(row.getValue("chngePric"))
+            const value = row.getValue("chngePric") as any;
+            if (value === null || value === undefined || value === 'N/A') {
+                return <span className="text-gray-400">N/A</span>;
+            }
+            const cp = parseFloat(value);
             if (cp === 0 || isNaN(cp)) {
                 return <span className="text-gray-400">N/A</span>;
             } else if(cp < 0 ){
@@ -85,7 +89,11 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
       header: "Chg%",
       size: 30,
         cell: ({ row }) => {
-            const cp = parseFloat(row.getValue("chngePricPct"))
+            const value = row.getValue("chngePricPct") as any;
+            if (value === null || value === undefined || value === 'N/A') {
+                return <span className="text-gray-400">N/A</span>;
+            }
+            const cp = parseFloat(value);
             if (cp === 0 || isNaN(cp)) {
                 return <span className="text-gray-400">N/A</span>;
             } else if(cp < 0 ){

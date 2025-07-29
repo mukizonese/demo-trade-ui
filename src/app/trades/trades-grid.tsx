@@ -61,7 +61,7 @@ export default function TradesGrid() {
 
         useEffect(() => {
             fetchTradesData()
-        }, [tradeDateString])
+        }, [tradeDateString, fetchTradesData])
 
 
       return (

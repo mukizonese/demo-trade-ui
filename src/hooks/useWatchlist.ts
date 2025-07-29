@@ -12,41 +12,49 @@ export function useWatchlist(watchlistId: number = 1) {
   const queryClient = useQueryClient();
   
   const hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
+  const [defaultSymbolsLoaded, setDefaultSymbolsLoaded] = useState(false);
 
-  // Get user's watchlist symbols
-  const {
-    data: symbols = [],
-    isLoading: isLoadingSymbols,
-    error: symbolsError,
-    refetch: refetchSymbols
-  } = useQuery({
+  // Get watchlist symbols
+  const { data: symbols = [], isLoading: isLoadingSymbols, error: symbolsError, refetch: refetchSymbols } = useQuery({
     queryKey: ['watchlist-symbols', user?.id, watchlistId],
     queryFn: async () => {
       if (!user) {
-        console.log('🔍 No user found, returning empty watchlist');
-        // Return empty watchlist when no user is authenticated
+        console.log('🔍 [WATCHLIST] No user found, returning empty symbols');
         return [];
       }
 
-      console.log('🔍 Current user:', user);
-      console.log('🔍 User email:', user.email);
-      console.log('🔍 User role:', user.role);
-
-      // Use the authenticated endpoint
+      console.log('🔍 [WATCHLIST] Fetching symbols for watchlist:', watchlistId);
       const response = await fetch(`${hosturl}/tradingzone/watchlist/my/symbols?watchlistId=${watchlistId}`, {
         credentials: 'include',
       });
       
       if (response.ok) {
         const symbols = await response.json();
-        console.log('🔍 Retrieved symbols:', symbols);
+        console.log('🔍 [WATCHLIST] Retrieved symbols:', symbols);
+        
+        // Check if these are default symbols (first time loading) - only for watchlist ID 1
+        const defaultSymbols = ['CHEMPLASTS', 'HDFCBANK', 'RELIANCE', 'SWIGGY', 'INFY'];
+        const hasDefaultSymbols = defaultSymbols.every(symbol => symbols.includes(symbol));
+        
+        if (watchlistId === 1 && hasDefaultSymbols && symbols.length === defaultSymbols.length && !defaultSymbolsLoaded) {
+          setDefaultSymbolsLoaded(true);
+          console.log('🔍 [WATCHLIST] Default symbols loaded for first time on watchlist 1');
+        }
+        
         return symbols;
       }
-      console.log('🔍 Failed to fetch symbols');
+      
+      // Handle 502 Bad Gateway error specifically
+      if (response.status === 502) {
+        console.log('🔍 [WATCHLIST] Services not ready (502), returning empty symbols');
+        return [];
+      }
+      
+      console.log('🔍 [WATCHLIST] Failed to fetch symbols, status:', response.status);
       return [];
     },
-    enabled: !!hosturl,
-    refetchInterval: 5000, // Refetch every 5 seconds to prevent dropdown closing
+    enabled: !!hosturl && !!user,
+    refetchInterval: 10000, // Refetch every 10 seconds - reduced from 3s to prevent excessive calls
     refetchIntervalInBackground: true,
   });
 
@@ -96,6 +104,7 @@ export function useWatchlist(watchlistId: number = 1) {
       queryClient.invalidateQueries({ queryKey: ['watchlist-symbols', user?.id, watchlistId] });
       queryClient.invalidateQueries({ queryKey: ['watchlists', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['watchlist-trades', user?.id, watchlistId] });
+      queryClient.invalidateQueries({ queryKey: ['latest-prices'] });
     },
   });
 
@@ -119,6 +128,7 @@ export function useWatchlist(watchlistId: number = 1) {
       queryClient.invalidateQueries({ queryKey: ['watchlist-symbols', user?.id, watchlistId] });
       queryClient.invalidateQueries({ queryKey: ['watchlists', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['watchlist-trades', user?.id, watchlistId] });
+      queryClient.invalidateQueries({ queryKey: ['latest-prices'] });
     },
   });
 
@@ -164,11 +174,50 @@ export function useWatchlist(watchlistId: number = 1) {
         console.log('🔍 [TRADES] Retrieved trades:', trades);
         return trades;
       }
-      console.log('🔍 [TRADES] Failed to fetch trades');
+      
+      // Handle 502 Bad Gateway error specifically
+      if (response.status === 502) {
+        console.log('🔍 [TRADES] Services not ready (502), returning empty trades');
+        return [];
+      }
+      
+      console.log('🔍 [TRADES] Failed to fetch trades, status:', response.status);
       return [];
     },
     enabled: !!hosturl && !!getLatestTradeDate.data,
-    refetchInterval: 5000, // Refetch every 5 seconds to prevent dropdown closing
+    refetchInterval: 10000, // Refetch every 10 seconds - reduced from 3s to prevent excessive calls
+    refetchIntervalInBackground: true,
+  });
+
+  // Get latest prices for symbols (fallback for symbols without trade data)
+  const getLatestPrices = useQuery({
+    queryKey: ['latest-prices', symbols],
+    queryFn: async () => {
+      if (!symbols || symbols.length === 0) {
+        return {};
+      }
+
+      const pricesMap: { [key: string]: any } = {};
+      
+      // Fetch latest prices for each symbol
+      const pricePromises = symbols.map(async (symbol: string) => {
+        try {
+          const response = await fetch(`${hosturl}/tradingzone/watchlist/latestprice/${symbol}`);
+          if (response.ok) {
+            const priceData = await response.json();
+            pricesMap[symbol] = priceData;
+          }
+        } catch (error) {
+          console.log(`🔍 [LATEST PRICES] Failed to fetch price for ${symbol}:`, error);
+        }
+      });
+
+      await Promise.all(pricePromises);
+      console.log('🔍 [LATEST PRICES] Retrieved prices:', pricesMap);
+      return pricesMap;
+    },
+    enabled: !!hosturl && !!symbols && symbols.length > 0,
+    refetchInterval: 5000, // Refetch every 5 seconds
     refetchIntervalInBackground: true,
   });
 
@@ -184,9 +233,11 @@ export function useWatchlist(watchlistId: number = 1) {
     isAddingSymbol: addSymbolMutation.isPending,
     isRemovingSymbol: removeSymbolMutation.isPending,
     getWatchlistTrades,
+    getLatestPrices,
     refetchSymbols,
     refetchWatchlists,
     isAuthenticated: !!user,
-    userRole: user?.role
+    userRole: user?.role,
+    defaultSymbolsLoaded
   };
 } 

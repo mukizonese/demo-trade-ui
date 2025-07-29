@@ -15,11 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { WelcomeMessage } from "./welcome-message"
 
 export default function WatchList() {
-  console.log('🔍 [WATCHLIST] WatchList component is rendering');
   const [currentWatchlistId, setCurrentWatchlistId] = useState(1);
-  const { watchlists, isLoadingWatchlists } = useWatchlist();
+  const { watchlists, isLoadingWatchlists, defaultSymbolsLoaded } = useWatchlist();
   const queryClient = useQueryClient();
   const hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
   const { user } = useSimpleAuth();
@@ -33,15 +33,16 @@ export default function WatchList() {
         credentials: 'include'
       });
       const result = await response.json();
-      console.log('🔍 [WATCHLIST] Create watchlist response:', result);
       return { success: result, watchlistId };
     },
     onSuccess: (data, watchlistId) => {
       queryClient.invalidateQueries({ queryKey: ['watchlists'] });
       // Switch to the newly created watchlist
-      console.log('🔍 [WATCHLIST] Created watchlist', watchlistId, 'switching to it');
       setCurrentWatchlistId(watchlistId);
     },
+    onError: (error) => {
+      console.error('🔍 [WATCHLIST] Create watchlist error:', error);
+    }
   });
 
   // Delete watchlist mutation
@@ -53,7 +54,6 @@ export default function WatchList() {
         credentials: 'include'
       });
       const result = await response.json();
-      console.log('🔍 [WATCHLIST] Delete watchlist response:', result);
       return { success: result, watchlistId };
     },
     onSuccess: (data, watchlistId) => {
@@ -67,8 +67,11 @@ export default function WatchList() {
 
   const handleCreateWatchlist = async () => {
     // Find the next available watchlist ID
-    const existingIds = Object.keys(watchlists).map(key => parseInt(key.split('_')[1]));
-    const nextId = Math.max(0, ...existingIds) + 1;
+    const existingIds = Object.keys(watchlists || {}).map(key => {
+      const parts = key.split(':');
+      return parts.length > 1 ? parseInt(parts[1]) : parseInt(key);
+    });
+    const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
     
     if (nextId <= 5) {
       createWatchlistMutation.mutate(nextId);
@@ -84,15 +87,18 @@ export default function WatchList() {
 
 
   // Get available watchlist IDs
-  const availableWatchlistIds = Object.keys(watchlists).map(key => parseInt(key.split('_')[1])).sort((a, b) => a - b);
+  const availableWatchlistIds = Object.keys(watchlists || {}).map(key => {
+    // Backend returns keys like "2:1" (tradingUserId:watchlistId)
+    const parts = key.split(':');
+    return parts.length > 1 ? parseInt(parts[1]) : parseInt(key);
+  }).sort((a, b) => a - b);
   const canCreateNew = availableWatchlistIds.length < 5;
   
-  //console.log('🔍 [WATCHLIST] Available watchlists:', availableWatchlistIds);
-  //console.log('🔍 [WATCHLIST] Current watchlist ID:', currentWatchlistId);
-  //console.log('🔍 [WATCHLIST] Watchlists data:', watchlists);
-
   return (
     <div className="flex flex-col h-full">
+      {/* Welcome Message */}
+      <WelcomeMessage defaultSymbolsLoaded={defaultSymbolsLoaded} watchlistId={currentWatchlistId} />
+      
       {/* Main Content Area - Takes up most of the space */}
       <div className="flex-1 min-h-0">
         <WatchListSearch currentWatchlistId={currentWatchlistId}/>
@@ -104,7 +110,12 @@ export default function WatchList() {
         <div className="flex items-center justify-between px-3 py-1.5">
           <div className="flex items-center space-x-1 overflow-x-auto">
             {availableWatchlistIds.map((watchlistId) => {
-              const symbolCount = watchlists[`watchlist_${watchlistId}`]?.length || 0;
+              // Find the correct key for this watchlist ID
+              const watchlistKey = Object.keys(watchlists || {}).find(key => {
+                const parts = key.split(':');
+                return parts.length > 1 && parseInt(parts[1]) === watchlistId;
+              });
+              const symbolCount = watchlistKey ? (watchlists[watchlistKey]?.length || 0) : 0;
               const isActive = currentWatchlistId === watchlistId;
               
               return (
@@ -169,7 +180,7 @@ export default function WatchList() {
           
           {/* Watchlist info */}
           <div className="text-xs text-gray-500">
-            {availableWatchlistIds.length}/5
+            {availableWatchlistIds.length > 0 ? `${availableWatchlistIds.length}/5` : '0/5'}
           </div>
         </div>
       </div>
