@@ -43,8 +43,8 @@ export function SharedAuthNav({
   // No user logged in - show sign-in button
   const handleSignIn = () => {
     const currentUrl = window.location.href;
-    const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001';
-    window.location.href = `${authClientUrl}/signin?redirectTo=${encodeURIComponent(currentUrl)}&source=demo-trade-ui`;
+          const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL;
+      window.location.href = `${authClientUrl}/signin?redirectTo=${encodeURIComponent(currentUrl)}&source=demo-trade-ui`;
   };
 
   return (

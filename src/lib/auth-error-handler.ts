@@ -192,7 +192,7 @@ export class AuthServiceErrorHandler {
    */
   async checkAuthClientHealth(): Promise<boolean> {
     try {
-      const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001';
+      const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL;
       const response = await fetch(`${authClientUrl}`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000) // 5 second timeout

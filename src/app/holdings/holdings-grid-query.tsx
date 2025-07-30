@@ -112,12 +112,14 @@ function HoldingsExample({ userId }: { userId?: number }) {
         });
       }, [user?.id, user?.email, user?.role, userId, loading, queryClientHoldings, user]); // Add missing dependencies
       
-      const fetchholdingssurl = hosturl ? hosturl + "/tradingzone/holdings/" + effectiveUserId : "";
+      const fetchholdingssurl = hosturl ? hosturl + "/tradingzone/holdings/my" : "";
 
       const { isLoading, error, data: serverData , isFetching , status } = useQuery({
         queryKey: ['holdings', effectiveUserId, user?.email], // Add user email to force refetch
            queryFn: async () => {
-                  const response = await fetch(fetchholdingssurl);
+                  const response = await fetch(fetchholdingssurl, {
+                    credentials: 'include' // Include cookies for authentication
+                  });
                   if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                   }

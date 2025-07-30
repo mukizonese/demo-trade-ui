@@ -198,7 +198,7 @@ async function actionTrade(symbol: string, qty: number, userId: number): Promise
   //console.log("qty " ,qty )
       var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
       
-      var action_url =  hosturl + "/tradingzone/holdings/buy/" + symbol +"?qty=" + qty + "&userId=" + userId;
+      var action_url =  hosturl + "/tradingzone/holdings/my/buy/" + symbol +"?qty=" + qty;
 
       //console.log(" action_url : ",action_url);
 
@@ -206,6 +206,7 @@ async function actionTrade(symbol: string, qty: number, userId: number): Promise
       const requestOptions = {
         method: "PUT", // Specify the request method
         headers: { "Content-Type": "application/json" }, // Specify the content type
+        credentials: 'include' as RequestCredentials, // Include cookies for authentication
         //body: JSON.stringify(data) // Send the data in JSON format
       };
 

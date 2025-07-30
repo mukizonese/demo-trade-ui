@@ -203,7 +203,7 @@ async function actionTrade(symbol: String, qty: number, holdqty: number, userId:
       //  console.log(" qty : ",qty);
       var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
       
-      var action_url =  hosturl + "/tradingzone/holdings/sell/" + symbol +"?qty=" + qty + "&userId=" + userId;
+      var action_url =  hosturl + "/tradingzone/holdings/my/sell/" + symbol +"?qty=" + qty;
 
       if(holdqty === 0){
         return { success: false, message: symbol + " - No holdings available to sell. Please buy first." };
@@ -217,6 +217,7 @@ async function actionTrade(symbol: String, qty: number, holdqty: number, userId:
           const requestOptions = {
             method: "PUT", // Specify the request method
             headers: { "Content-Type": "application/json" }, // Specify the content type
+            credentials: 'include' as RequestCredentials, // Include cookies for authentication
             //body: JSON.stringify(data) // Send the data in JSON format
           };
 

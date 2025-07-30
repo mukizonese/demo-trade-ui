@@ -19,7 +19,7 @@ export const authClient = {
   // Get current user from auth service
   getCurrentUser: async (): Promise<AuthResponse> => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001'}/api/auth/me`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL}/api/auth/me`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export const authClient = {
 
   // Redirect to auth client for sign in
   signIn: (redirectTo?: string) => {
-    const authUrl = `${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001'}/signin`;
+    const authUrl = `${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL}/signin`;
     const params = new URLSearchParams();
     if (redirectTo) {
       params.set('redirectTo', redirectTo);
@@ -57,7 +57,7 @@ export const authClient = {
 
   // Redirect to auth client for sign up
   signUp: (redirectTo?: string) => {
-    const authUrl = `${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001'}/signup`;
+    const authUrl = `${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL}/signup`;
     const params = new URLSearchParams();
     if (redirectTo) {
       params.set('redirectTo', redirectTo);
@@ -69,7 +69,7 @@ export const authClient = {
 
   // Redirect to auth client for profile management
   profile: () => {
-    const authUrl = `${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001'}/profile`;
+    const authUrl = `${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL}/profile`;
     const params = new URLSearchParams();
     params.set('source', 'demo-trade-ui');
     params.set('redirectTo', window.location.href);
@@ -80,7 +80,7 @@ export const authClient = {
   // Sign out
   signOut: async (): Promise<void> => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001'}/api/auth/signout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_AUTH_CLIENT_URL}/api/auth/signout`, {
         method: 'POST',
         credentials: 'include',
       });

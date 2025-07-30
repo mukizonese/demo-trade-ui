@@ -45,7 +45,7 @@ export function AccountSuspended({ userEmail, onSignOut }: AccountSuspendedProps
             <Button 
               variant="outline" 
               onClick={() => {
-                const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001';
+                const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL;
                 window.location.href = `${authClientUrl}/signin?source=demo-trade-ui&redirectTo=${encodeURIComponent(window.location.href)}`;
               }}
             >

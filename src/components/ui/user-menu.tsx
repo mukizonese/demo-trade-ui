@@ -51,7 +51,7 @@ export function UserMenu() {
       
       // Redirect to auth-client sign-in
       const currentUrl = window.location.href;
-      const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001';
+      const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL;
       window.location.href = `${authClientUrl}/signin?redirectTo=${encodeURIComponent(currentUrl)}&source=demo-trade-ui`;
       return;
     }
@@ -87,7 +87,7 @@ export function UserMenu() {
   const handleProfile = () => {
     // Redirect to auth-client profile page
     const currentUrl = window.location.href;
-    const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL || 'http://localhost:3001';
+    const authClientUrl = process.env.NEXT_PUBLIC_AUTH_CLIENT_URL;
     window.location.href = `${authClientUrl}/profile?redirectTo=${encodeURIComponent(currentUrl)}&source=demo-trade-ui`;
   };
 

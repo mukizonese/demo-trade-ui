@@ -77,7 +77,7 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
           const userId = await getCachedTradingUserId();
           
           const hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
-          const response = await fetch(`${hosturl}/tradingzone/holdings/${userId}`, {
+          const response = await fetch(`${hosturl}/tradingzone/holdings/my`, {
             credentials: 'include'
           });
           
