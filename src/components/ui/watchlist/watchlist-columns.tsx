@@ -28,13 +28,6 @@ export type WatchList = {
 
 export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void): ColumnDef<WatchList>[] => {
   return [
-/*
-    {
-    accessorKey: "tradDt",
-    //visible: false,
-    header: "Trade Date",
-    },
- */
     {
     accessorKey: "tckrSymb",
         header: ({ column }) => {
@@ -42,27 +35,34 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
             <Button
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs lg:text-sm font-medium"
             >
               Symbol
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <ArrowUpDown className="ml-1 lg:ml-2 h-3 w-3 lg:h-4 lg:w-4" />
             </Button>
           )
         },
+        cell: ({ row }) => {
+          const symbol = row.getValue("tckrSymb") as string;
+          return (
+            <div className="font-medium text-xs lg:text-sm">
+              {symbol}
+            </div>
+          );
+        },
+        size: 80,
     },
-/*     {
-    accessorKey: "prvsClsgPric",
-    header: "Prev. Close Price",
-    }, */
     {
       accessorKey: "lastPric",
       header: "LTP",
       cell: ({ row }) => {
-        const price = row.getValue("lastPric");
+        const price = row.getValue("lastPric") as any;
         if (price === 0 || price === null || price === undefined || price === 'N/A') {
-          return <span className="text-gray-400">N/A</span>;
+          return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
         }
-        return price;
-      }
+        return <span className="text-xs lg:text-sm">{String(price)}</span>;
+      },
+      size: 60,
     },
     {
         accessorKey: "chngePric",
@@ -71,37 +71,37 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
         cell: ({ row }) => {
             const value = row.getValue("chngePric") as any;
             if (value === null || value === undefined || value === 'N/A') {
-                return <span className="text-gray-400">N/A</span>;
+                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
             }
             const cp = parseFloat(value);
             if (cp === 0 || isNaN(cp)) {
-                return <span className="text-gray-400">N/A</span>;
+                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
             } else if(cp < 0 ){
-                return  <p className="text-red-600">{cp}</p> ;
+                return  <p className="text-red-600 text-xs lg:text-sm">{cp}</p> ;
             } else if (cp > 0 ){
-                return  <p className="text-green-700">{cp}</p>  ;
+                return  <p className="text-green-700 text-xs lg:text-sm">{cp}</p>  ;
             }
-            return <span className="text-gray-400">N/A</span>;
+            return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
         }
     },
     {
       accessorKey: "chngePricPct",
       header: "Chg%",
-      size: 30,
+      size: 40,
         cell: ({ row }) => {
             const value = row.getValue("chngePricPct") as any;
             if (value === null || value === undefined || value === 'N/A') {
-                return <span className="text-gray-400">N/A</span>;
+                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
             }
             const cp = parseFloat(value);
             if (cp === 0 || isNaN(cp)) {
-                return <span className="text-gray-400">N/A</span>;
+                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
             } else if(cp < 0 ){
-                return  <p className="text-red-600">{cp}</p> ;
+                return  <p className="text-red-600 text-xs lg:text-sm">{cp}</p> ;
             } else if (cp > 0 ){
-                return  <p className="text-green-700">{cp}</p>  ;
+                return  <p className="text-green-700 text-xs lg:text-sm">{cp}</p>  ;
             }
-            return <span className="text-gray-400">N/A</span>;
+            return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
         }
     },
   ];

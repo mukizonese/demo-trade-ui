@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { LatestTradeDate } from "@/components/ui/tradeutil/trade-util"
+
 
 const queryClient = new QueryClient()
 
@@ -53,90 +53,77 @@ function Example() {
 
         const [tradeDate, setTradeDate] = React.useState<Date>(new Date("2024-12-02"))
         const [tradeDateString, setTradeDateString] = useState("2024-12-02 00:00:00")
+        const queryClient = useQueryClient()
+        const [intervalMs, setIntervalMs] = React.useState(5000)
+        const [intervalSec, setIntervalSec] = React.useState(5000) //10000 is 10s
 
-        const latestDate = LatestTradeDate();
-        //console.log ("WatchListGridQuery latestTradeDate() > ")
-        //console.log ( latestDate)
-        //console.log ("WatchListGridQuery latestTradeDate() > ", latestDate, " latestDate.substring(0,10) > ", latestDate.substring(0,10))
-
-        const memoInit = useMemo(() => {
-            if (typeof latestDate === "string" && latestDate.length === 0) {
-                    //console.log("The string is empty");
-                    setTradeDate(new Date("2024-12-09"));
-                    setTradeDateString("2024-12-09 00:00:00")
-                } else if (latestDate === null) {
-                    //console.log("The string is null");
-                    setTradeDate(new Date("2024-12-09"));
-                    setTradeDateString("2024-12-09 00:00:00")
-                } else {
-                    //console.log("The string is not empty or null");
-                    setTradeDate(new Date(latestDate.substring(0,10)));
-                    setTradeDateString(latestDate)
+        // Fetch latest trade date using React Query
+        const { data: latestDate, isLoading: isLoadingLatestDate } = useQuery({
+            queryKey: ['latestTradeDate'],
+            queryFn: async () => {
+                const response = await fetch(hosturl + "/tradingzone/trades/latestdate/");
+                if (!response.ok) {
+                    throw new Error('Failed to fetch latest trade date');
                 }
+                return response.json();
+            },
+            refetchInterval: 30000, // Refetch every 30 seconds
+        });
+
+        // Set trade date when latest date is available
+        React.useEffect(() => {
+            if (latestDate && typeof latestDate === "string" && latestDate.length > 0) {
+                setTradeDate(new Date(latestDate.substring(0,10)));
+                setTradeDateString(latestDate);
+            } else {
+                // Fallback to default date if no latest date available
+                setTradeDate(new Date("2025-07-21"));
+                setTradeDateString("2025-07-21 00:00:00");
+            }
         }, [latestDate]);
 
-    const handleTradeDateChange = (selectedDate : Date)  => {
+        var fetchtradesurl =  hosturl + "/tradingzone/tradesByDate?date=" + tradeDateString + "&live=true";
 
-         //console.log ("selectedDate > ", selectedDate)
+        const { isLoading, error, data: serverData , isFetching , status } = useQuery({
+            queryKey: ['trades', tradeDateString],
+            queryFn: () =>
+                  fetch(fetchtradesurl, {
+                    credentials: 'include', // Include cookies for authentication
+                  })
+                    .then(response => {
+                      if(response.ok) return response.json();
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    })
+                    .then(data  => {
+                      return data
+                    }),
+            refetchInterval: intervalSec,
+        });
+
+        //use memo shows empry data if set when api cals are in process of fetching
+        const data = useMemo(() => serverData ?? [], [serverData]);
+
+        // Show loading while fetching latest date
+        if (isLoadingLatestDate) {
+            return <h1>Loading latest trade date...</h1>
+        }
+
+        if (status === 'pending') return <h1>Loading...</h1>
+        if (status === 'error') {
+            console.error('Trades API Error:', error);
+            return <span>Error: {error.message}</span>
+        }
+
+    const handleTradeDateChange = (selectedDate : Date)  => {
          setTradeDate(selectedDate)
         var dateFormatted = format(toDate(selectedDate), "yyyy-MM-dd");
-        //console.log ("dateFormatted > ",dateFormatted)
         var selectedDateString = dateFormatted + " 00:00:00"
-        //console.log ("selectedDateString > ",selectedDateString)
         setTradeDateString(selectedDateString)
     }
-
-      const queryClient = useQueryClient()
-      const [intervalMs, setIntervalMs] = React.useState(5000)
-      //const [value, setValue] = React.useState('')
-      const [intervalSec, setIntervalSec] = React.useState(5000) //10000 is 10s
 
     const handleIntervalStringToInt = (value: string) => {
         setIntervalSec(parseInt(value))
     }
-
-
-      var fetchtradesurl =  hosturl + "/tradingzone/tradesByDate?date=" + tradeDateString + "&live=true";
-      //console.log ("fetchtradesurl > ",fetchtradesurl)
-
-
-    const { isLoading, error, data: serverData , isFetching , status } = useQuery({
-        queryKey: ['trades', tradeDateString],
-/*         queryFn: () =>
-            fetch(fetchtradesurl).then((res) =>
-            res.json()
-            ) */
-           queryFn: () =>
-                  fetch(fetchtradesurl)
-                    .then(response => {
-                      if(response.ok) return response.json();
-                    })
-                    .then(data  => {
-                      return data
-                    })
- /*               queryFn: async (): Promise<Array<Trade>> => {
-                  const response = await fetch(fetchtradesurl)
-                  return await response.json()
-                } */
-//              queryFn:  async () => getTradeByDates(intervalDate)
-//                queryFn:  getTradeByDates(intervalDate)
-            ,
-            // Refetch the data every second
-            refetchInterval: intervalSec,
-            //enabled: true,
-      })
-
-        //use memo shows empry data if set when api cals are in process of fetching
-        const data = useMemo(() => serverData ?? [], [serverData]);
-        /* console.log(data);
-          if (data === undefined) {
-            return <h1>Loading..as data not obtained.</h1>
-          } */
-
-
-        if (status === 'pending') return <h1>Loading...</h1>
-        if (status === 'error') return <span>Error: {error.message}</span>
-        //if (status === 'error') return <span>Error... </span>
 
       return (
 

@@ -27,9 +27,18 @@ import { authErrorHandler } from '@/lib/auth-error-handler';
 const queryClientBuyPopover = new QueryClient()
 
 export default function BuyActionPopover(props : any) {
-  const { onActionClick } = props; // Callback to close parent popup
-  const { user } = useSimpleAuth();
+  const { onActionClick, price } = props; // Callback to close parent popup and price
+  const { user, loading } = useSimpleAuth();
   const { toast } = useToast();
+
+  // Wait for auth to load to prevent hydration mismatch
+  if (loading) {
+    return (
+      <button className="px-1.5 py-0.5 text-xs font-medium text-gray-400 border border-gray-300 rounded">
+        B
+      </button>
+    );
+  }
 
   const handleBuyClick = async () => {
     // Proactively check auth service health before showing popover
@@ -54,16 +63,14 @@ export default function BuyActionPopover(props : any) {
     <QueryClientProvider client={queryClientBuyPopover}>
       {/**<ReactQueryDevtools /> */}
       {user?.role === 'trader' ? (
-        <ActionPopoverQuery symbol={props.symbol} onActionClick={onActionClick} />
+        <ActionPopoverQuery symbol={props.symbol} price={price} onActionClick={onActionClick} />
       ) : (
-        <div className="flex items-center justify-center p-2">
-          <button 
-            className="text-xs text-blue-600 hover:text-blue-800 underline"
-            onClick={handleBuyClick}
-          >
-            B
-          </button>
-        </div>
+        <button 
+          className="px-0.5 py-0 text-xs font-medium text-blue-600 border border-blue-500 rounded hover:bg-blue-50 h-2 w-2"
+          onClick={handleBuyClick}
+        >
+          B
+        </button>
       )}
     </QueryClientProvider>
   )
@@ -80,7 +87,7 @@ export function ActionPopoverQuery(props : any) {
     const { user } = useSimpleAuth();
     const queryClientBuyPopover = useQueryClient()
     const symbol= props.symbol;
-    const { onActionClick } = props; // Callback to close parent popup
+    const { onActionClick, price } = props; // Callback to close parent popup and price
     const [quantity, setQuantity] = React.useState(1)
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false)
 
@@ -99,33 +106,8 @@ export function ActionPopoverQuery(props : any) {
       setIsPopoverOpen(true);
     };
 
-    var hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
-      var fetchlatestpriceurl =  hosturl+ "/tradingzone/watchlist/latestprice/" + symbol;
-      //console.log ("fetchlatestpriceurl > ",fetchlatestpriceurl)
-
-
-        const { isLoading, error, data: serverData , isFetching , status } = useQuery({
-            queryKey: ['buysymbol',symbol ],
-               queryFn: () =>
-                      fetch(fetchlatestpriceurl)
-                        .then(response => {
-                          if(response.ok) return response.json();
-                        })
-                        .then(data  => {
-                          return data
-                        })
-                ,
-                refetchInterval: 10000,
-          })
-
-              if (serverData === undefined) {
-                return <h1>Loading..as data not obtained.</h1>
-              }
-
-            if (status === 'pending') return <h1>Loading...</h1>
-            if (status === 'error') return <span>Error: {error.message}</span>
-            //if (status === 'error') return <span>Error... </span>
-
+    // Use the actual price from watchlist data, fallback to static price if not provided
+    const currentPrice = price || 5561.5;
 
   return (
       <Popover open={isPopoverOpen} onOpenChange={(open) => {
@@ -136,14 +118,8 @@ export function ActionPopoverQuery(props : any) {
         }
       }}>
         <PopoverTrigger asChild>
-          <button onClick={handlePopoverTriggerClick}>
-            <Image
-               src="/icons/buy-popover.svg"
-               alt="Buy"
-               width={15}
-               height={15}
-               priority
-             />
+          <button onClick={handlePopoverTriggerClick} className="px-0.5 py-0 text-xs font-medium text-blue-600 border border-blue-400 rounded hover:bg-blue-50 h-2 w-2">
+            B
           </button>
         </PopoverTrigger>
          <PopoverContent className="w-60 " sideOffset={5} alignOffset={2}>
@@ -154,7 +130,7 @@ export function ActionPopoverQuery(props : any) {
                   <div className="grid gap-2">
                     <div className="grid grid-cols-2 items-center gap-4">
                       <Label >Price.</Label>
-                      <Label >{serverData.lastPric}</Label>
+                      <Label >{currentPrice}</Label>
                     </div>
                       <div className="grid grid-cols-2 items-center gap-4">
                         <Label >Qty.</Label>
@@ -163,23 +139,19 @@ export function ActionPopoverQuery(props : any) {
                           type="number"
                           defaultValue="1"
                           className="col-span-1 h-8"
-                          //onChange={e => setQuantity((e.target as HTMLInputElement).value)}
                           onChange={e => setQuantity(e.target.valueAsNumber)}
                         />
                       </div>
                     <div className="grid grid-cols-2 items-center gap-4">
                       <Label >Amount</Label>
                       <Label >
-                        {
-                            formatNumbers(serverData.lastPric, quantity )
-                        }
+                        {new Intl.NumberFormat('en-IN').format(currentPrice * quantity)}
                         </Label>
                     </div>
                   </div>
                   < div className="grid gap-4">
                    <div className="grid grid-cols-2 items-center gap-4">
                         <Button className="bg-blue-300"
-                        //onClick={() =>  {  actionTrade(symbol, quantity ,"B") }}
                         onClick={async () =>  {
                                   // Close popover immediately when button is clicked
                                   setIsPopoverOpen(false);

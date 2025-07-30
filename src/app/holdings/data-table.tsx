@@ -65,14 +65,14 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
+        <div className="rounded-md border overflow-auto">
+          <Table className="min-w-full">
+            <TableHeader className="sticky top-0 bg-white z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className="text-xs lg:text-sm">
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -91,9 +91,10 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    className="text-xs lg:text-sm hover:bg-gray-50"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="py-0.5 px-2 lg:py-0 lg:px-4">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -101,19 +102,20 @@ export function DataTable<TData, TValue>({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <TableCell colSpan={columns.length} className="h-24 text-center text-sm">
                     No results.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-          <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex items-center justify-end space-x-2 py-4 px-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
+                className="text-xs"
               >
                 Previous
               </Button>
@@ -122,6 +124,7 @@ export function DataTable<TData, TValue>({
                 size="sm"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
+                className="text-xs"
               >
                 Next
               </Button>

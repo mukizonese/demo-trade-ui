@@ -18,40 +18,46 @@ export function useWatchlist(watchlistId: number = 1) {
   const { data: symbols = [], isLoading: isLoadingSymbols, error: symbolsError, refetch: refetchSymbols } = useQuery({
     queryKey: ['watchlist-symbols', user?.id, watchlistId],
     queryFn: async () => {
-      if (!user) {
-        console.log('🔍 [WATCHLIST] No user found, returning empty symbols');
+      if (!user || !user.id) {
         return [];
       }
 
-      //console.log('🔍 [WATCHLIST] Fetching symbols for watchlist:', watchlistId);
-      const response = await fetch(`${hosturl}/tradingzone/watchlist/my/symbols?watchlistId=${watchlistId}`, {
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const symbols = await response.json();
-        //console.log('🔍 [WATCHLIST] Retrieved symbols:', symbols);
+      try {
+        //console.log('🔍 [WATCHLIST] Fetching symbols for watchlist:', watchlistId);
+        const response = await fetch(`${hosturl}/tradingzone/watchlist/my/symbols?watchlistId=${watchlistId}`, {
+          credentials: 'include',
+        });
         
-        // Check if these are default symbols (first time loading) - only for watchlist ID 1
-        const defaultSymbols = ['CHEMPLASTS', 'HDFCBANK', 'RELIANCE', 'SWIGGY', 'INFY'];
-        const hasDefaultSymbols = defaultSymbols.every(symbol => symbols.includes(symbol));
-        
-        if (watchlistId === 1 && hasDefaultSymbols && symbols.length === defaultSymbols.length && !defaultSymbolsLoaded) {
-          setDefaultSymbolsLoaded(true);
-          //console.log('🔍 [WATCHLIST] Default symbols loaded for first time on watchlist 1');
+        if (response.ok) {
+          const symbols = await response.json();
+          //console.log('🔍 [WATCHLIST] Retrieved symbols:', symbols);
+          
+          // Check if these are default symbols (first time loading) - only for watchlist ID 1
+          const defaultSymbols = ['CHEMPLASTS', 'HDFCBANK', 'RELIANCE', 'SWIGGY', 'INFY'];
+          const hasDefaultSymbols = defaultSymbols.every((symbol: any) => 
+            symbols.includes(symbol.tckrSymb)
+          );
+          
+          if (watchlistId === 1 && hasDefaultSymbols && symbols.length === defaultSymbols.length && !defaultSymbolsLoaded) {
+            setDefaultSymbolsLoaded(true);
+            //console.log('🔍 [WATCHLIST] Default symbols loaded for first time on watchlist 1');
+          }
+          
+          return symbols;
         }
         
-        return symbols;
-      }
-      
-      // Handle 502 Bad Gateway error specifically
-      if (response.status === 502) {
-        console.log('🔍 [WATCHLIST] Services not ready (502), returning empty symbols');
+        // Handle 502 Bad Gateway error specifically
+        if (response.status === 502) {
+          console.log('🔍 [WATCHLIST] Services not ready (502), returning empty symbols');
+          return [];
+        }
+        
+        console.log('🔍 [WATCHLIST] Failed to fetch symbols, status:', response.status);
+        return [];
+      } catch (error) {
+        console.error('Error fetching symbols:', error);
         return [];
       }
-      
-      console.log('🔍 [WATCHLIST] Failed to fetch symbols, status:', response.status);
-      return [];
     },
     enabled: !!hosturl && !!user,
     refetchInterval: 10000, // Refetch every 10 seconds - reduced from 3s to prevent excessive calls
@@ -164,25 +170,30 @@ export function useWatchlist(watchlistId: number = 1) {
       //console.log('🔍 [TRADES] User role:', user.role);
       //console.log('🔍 [TRADES] Trade date:', tradeDate);
 
-      // Use the authenticated endpoint
-      const response = await fetch(`${hosturl}/tradingzone/watchlist/my/trades?date=${tradeDate}&watchlistId=${watchlistId}`, {
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const trades = await response.json();
-        //console.log('🔍 [TRADES] Retrieved trades:', trades);
-        return trades;
-      }
-      
-      // Handle 502 Bad Gateway error specifically
-      if (response.status === 502) {
-        console.log('🔍 [TRADES] Services not ready (502), returning empty trades');
+      try {
+        // Use the authenticated endpoint
+        const response = await fetch(`${hosturl}/tradingzone/watchlist/my/trades?date=${tradeDate}&watchlistId=${watchlistId}`, {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const trades = await response.json();
+          //console.log('🔍 [TRADES] Retrieved trades:', trades);
+          return trades;
+        }
+        
+        // Handle 502 Bad Gateway error specifically
+        if (response.status === 502) {
+          console.log('🔍 [TRADES] Services not ready (502), returning empty trades');
+          return [];
+        }
+        
+        console.log('🔍 [TRADES] Failed to fetch trades, status:', response.status);
+        return [];
+      } catch (error) {
+        console.error('Error fetching trades:', error);
         return [];
       }
-      
-      console.log('🔍 [TRADES] Failed to fetch trades, status:', response.status);
-      return [];
     },
     enabled: !!hosturl && !!getLatestTradeDate.data,
     refetchInterval: 10000, // Refetch every 10 seconds - reduced from 3s to prevent excessive calls

@@ -75,7 +75,6 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
           // Clear cache to ensure we get the current user's ID
           clearTradingUserIdCache();
           const userId = await getCachedTradingUserId();
-          //console.log('🔍 [HOLDINGS] Fetching holdings for user ID:', userId);
           
           const hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
           const response = await fetch(`${hosturl}/tradingzone/holdings/${userId}`, {
@@ -84,7 +83,6 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
           
           if (response.ok) {
             const data = await response.json();
-            //console.log('🔍 [HOLDINGS] Holdings data received:', data);
             setHoldingsData(data);
             
             // Create a map of symbol to quantity
@@ -94,7 +92,6 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
                 map.set(holding.tckrSymb, holding.avgQty || 0);
               });
             }
-            //console.log('🔍 [HOLDINGS] Holdings map created:', Object.fromEntries(map));
             setHoldingsMap(map);
           } else {
             console.error('🔍 [HOLDINGS] Failed to fetch holdings, status:', response.status);
@@ -105,10 +102,9 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
       };
 
       if (user && user.id) {
-        //console.log('🔍 [HOLDINGS] User is authenticated, fetching holdings for:', user.email, 'role:', user.role);
         fetchHoldings();
       } else {
-        console.log('🔍 [HOLDINGS] User is not authenticated:', user?.role);
+        // User not authenticated, return empty array
       }
     }, [user]);
 
@@ -140,6 +136,10 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
 
     // Combine symbols with trade data
     const combinedData = useMemo(() => {
+        if (!user || !user.id) {
+          return [];
+        }
+
         if (!symbols || symbols.length === 0) {
             return [];
         }
@@ -195,9 +195,8 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
             }
         });
 
-        //console.log('🔍 [GRID] Combined data:', combined);
         return combined;
-    }, [symbols, serverData, latestPrices]);
+    }, [symbols, serverData, latestPrices, user]);
 
     if (status === 'pending' || isLoadingPrices) return <h1>Loading...</h1>
     if (status === 'error') return <span>Error: {error.message}</span>

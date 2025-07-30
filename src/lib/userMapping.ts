@@ -20,7 +20,7 @@ export async function getTradingUserId(): Promise<number> {
     //console.log('🔍 [USER MAPPING] Fetching trading user ID from:', `${authApiUrl}/api/mapping/trading-user-id`);
     
     const response = await fetch(`${authApiUrl}/api/mapping/trading-user-id`, {
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -51,6 +51,8 @@ export async function getTradingUserId(): Promise<number> {
 let cachedTradingUserId: number | null = null;
 let cacheExpiry: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_KEY = 'trading_user_id';
+const CACHE_TIMESTAMP_KEY = 'trading_user_id_timestamp';
 
 export async function getCachedTradingUserId(): Promise<number> {
   const now = Date.now();
@@ -65,8 +67,9 @@ export async function getCachedTradingUserId(): Promise<number> {
   console.log('🔍 [USER MAPPING] Cache expired or empty, fetching new trading user ID...');
   const tradingUserId = await getTradingUserId();
   
-  // Cache the result
-  cachedTradingUserId = tradingUserId;
+  // Cache the new value
+  localStorage.setItem(CACHE_KEY, tradingUserId.toString());
+  localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
   cacheExpiry = now + CACHE_DURATION;
   
   console.log('🔍 [USER MAPPING] Cached new trading user ID:', tradingUserId);
@@ -78,6 +81,8 @@ export async function getCachedTradingUserId(): Promise<number> {
  */
 export function clearTradingUserIdCache(): void {
   //console.log('🔍 [USER MAPPING] Clearing trading user ID cache');
+  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem(CACHE_TIMESTAMP_KEY);
   cachedTradingUserId = null;
   cacheExpiry = 0;
 } 

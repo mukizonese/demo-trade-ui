@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
 import { SymbolSearch } from "@/components/ui/symbol-search"
 import { useWatchlist } from '@/hooks/useWatchlist';
 // Auth is handled by SharedAuthNav component
@@ -50,43 +49,30 @@ export default function WatchListSearch({ currentWatchlistId = 1 }: WatchListSea
     return (
       <div className="space-y-2">
         {/* Search and Actions */}
-        <div className="grid grid-cols-10 flex gap-3 items-left flex-col sm:flex-row">
-          <div className="col-span-6 ">
+        <div className="flex flex-row gap-2 sm:gap-3 w-full">
+          <div className="flex-1 min-w-0">
               <SymbolSearch initialSymbol="HDFCBANK" updateParentSymbol={updateParentSymbol} />
           </div>
-          <div className="col-span-2 ">
+          <div className="flex gap-2 sm:gap-3 flex-shrink-0 w-auto">
               <Button 
                   variant="outline" 
-                  className="ml-auto"
+                  size="sm"
+                  className="w-10 h-10 text-lg font-bold flex-shrink-0"
                   onClick={handleAddSymbol}
                   disabled={isAddingSymbol || !selectedSymbol.trim() || symbols.length >= 10}
                   title={symbols.length >= 10 ? "Watchlist is full (max 10 symbols)" : "Add symbol"}
               >
-                  <Image
-                       className="dark:invert"
-                       src="/icons/circle-plus.svg"
-                       alt="Add"
-                       width={20}
-                       height={20}
-                       priority
-                     />
+                  +
               </Button>
-          </div>
-          <div className="col-span-2 ">
               <Button 
                   variant="outline" 
-                  className="ml-auto"
+                  size="sm"
+                  className="w-10 h-10 text-lg font-bold flex-shrink-0"
                   onClick={handleRemoveSymbol}
                   disabled={isRemovingSymbol || !selectedSymbol.trim()}
+                  title="Remove symbol from watchlist"
               >
-                  <Image
-                       className="dark:invert"
-                       src="/icons/circle-minus.svg"
-                       alt="Rem"
-                       width={20}
-                       height={20}
-                       priority
-                     />
+                  -
               </Button>
           </div>
         </div>

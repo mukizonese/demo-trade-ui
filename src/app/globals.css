@@ -76,3 +76,165 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile-specific improvements */
+@layer components {
+  /* Ensure minimum touch target size for mobile */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve table scrolling on mobile */
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Adjust text sizes for mobile */
+  .text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  /* Improve spacing for mobile */
+  .space-y-2 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+
+  /* Mobile navigation overlay */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Ensure tables have proper width on mobile */
+  table {
+    min-width: 100%;
+  }
+
+  /* Mobile grid layout */
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Ensure holdings summary is visible on mobile */
+  .holdings-summary {
+    display: block !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+  /* Prevent content from being cut off */
+  .holdings-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  /* Force holdings content to be visible */
+  .holdings-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Mobile toast improvements */
+  [data-radix-toast-viewport] {
+    position: fixed !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    pointer-events: auto !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Desktop toast positioning */
+  @media (min-width: 1024px) {
+    [data-radix-toast-viewport] {
+      top: auto !important;
+      bottom: 0 !important;
+      left: auto !important;
+      right: 0 !important;
+      transform: none !important;
+      max-width: 420px !important;
+    }
+  }
+
+  /* Ensure toast content is readable on mobile */
+  [data-radix-toast-root] {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 0.5rem !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 99999 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Toast text readability on mobile */
+  [data-radix-toast-title],
+  [data-radix-toast-description] {
+    color: #1f2937 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Force toast visibility on mobile */
+  .toast-viewport {
+    position: fixed !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Additional toast visibility fixes */
+  .ToastViewport {
+    position: fixed !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .ToastRoot {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 0.5rem !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}

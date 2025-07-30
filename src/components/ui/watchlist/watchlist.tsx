@@ -84,8 +84,6 @@ export default function WatchList() {
     }
   };
 
-
-
   // Get available watchlist IDs
   const availableWatchlistIds = Object.keys(watchlists || {}).map(key => {
     // Backend returns keys like "2:1" (tradingUserId:watchlistId)
@@ -95,20 +93,26 @@ export default function WatchList() {
   const canCreateNew = availableWatchlistIds.length < 5;
   
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white rounded-lg border">
       {/* Welcome Message */}
-      <WelcomeMessage defaultSymbolsLoaded={defaultSymbolsLoaded} watchlistId={currentWatchlistId} />
+      <div className="p-3 lg:p-4 border-b">
+        <WelcomeMessage defaultSymbolsLoaded={defaultSymbolsLoaded} watchlistId={currentWatchlistId} />
+      </div>
       
       {/* Main Content Area - Takes up most of the space */}
-      <div className="flex-1 min-h-0">
-        <WatchListSearch currentWatchlistId={currentWatchlistId}/>
-        <WatchListGrid currentWatchlistId={currentWatchlistId} onWatchlistChange={setCurrentWatchlistId}/>
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="p-3 lg:p-4 border-b">
+          <WatchListSearch currentWatchlistId={currentWatchlistId}/>
+        </div>
+        <div className="flex-1 min-h-0 p-3 lg:p-4">
+          <WatchListGrid currentWatchlistId={currentWatchlistId} onWatchlistChange={setCurrentWatchlistId}/>
+        </div>
       </div>
 
-      {/* Watchlist Tabs at Bottom - Zerodha Style */}
-      <div className="border-t border-gray-200 bg-white flex-shrink-0">
-        <div className="flex items-center justify-between px-3 py-1.5">
-          <div className="flex items-center space-x-1 overflow-x-auto">
+      {/* Watchlist Tabs at Bottom - Mobile Responsive */}
+      <div className="border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        <div className="flex items-center justify-between px-3 py-2 lg:px-4 lg:py-3">
+          <div className="flex items-center space-x-1 overflow-x-auto flex-1">
             {availableWatchlistIds.map((watchlistId) => {
               // Find the correct key for this watchlist ID
               const watchlistKey = Object.keys(watchlists || {}).find(key => {
@@ -119,7 +123,7 @@ export default function WatchList() {
               const isActive = currentWatchlistId === watchlistId;
               
               return (
-                <div key={watchlistId} className="flex items-center">
+                <div key={watchlistId} className="flex items-center flex-shrink-0">
                   {watchlistId !== 1 ? (
                     // Non-default watchlists: Right-click to show delete action
                     <DropdownMenu>
@@ -131,10 +135,10 @@ export default function WatchList() {
                             // Show delete confirmation on right-click
                             handleDeleteWatchlist(watchlistId);
                           }}
-                          className={`px-2 py-1 text-xs font-medium rounded transition-colors cursor-pointer ${
+                          className={`px-2 py-1 text-xs font-medium rounded transition-colors cursor-pointer whitespace-nowrap ${
                             isActive 
                               ? 'bg-blue-100 text-blue-700 border border-blue-300' 
-                              : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                           }`}
                           title={`Click to switch to Watchlist ${watchlistId}. Right-click to delete.`}
                         >
@@ -149,10 +153,10 @@ export default function WatchList() {
                     // Default watchlist: Just clickable, no delete option
                     <button
                       onClick={() => setCurrentWatchlistId(watchlistId)}
-                      className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                         isActive 
                           ? 'bg-blue-100 text-blue-700 border border-blue-300' 
-                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                          : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                       }`}
                     >
                       {watchlistId}
@@ -170,7 +174,7 @@ export default function WatchList() {
               <button
                 onClick={handleCreateWatchlist}
                 disabled={createWatchlistMutation.isPending}
-                className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded transition-colors flex items-center"
+                className="px-2 py-1 text-xs font-medium text-gray-600 bg-white hover:bg-gray-100 border border-gray-200 rounded transition-colors flex items-center flex-shrink-0"
                 title="Create new watchlist"
               >
                 <Plus className="w-3 h-3" />
@@ -179,7 +183,7 @@ export default function WatchList() {
           </div>
           
           {/* Watchlist info */}
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 flex-shrink-0 ml-2">
             {availableWatchlistIds.length > 0 ? `${availableWatchlistIds.length}/5` : '0/5'}
           </div>
         </div>

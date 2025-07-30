@@ -41,49 +41,68 @@ export const columns: ColumnDef<HoldingValue>[] = [
             <Button
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs lg:text-sm font-medium"
             >
               Symbol
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <ArrowUpDown className="ml-1 lg:ml-2 h-3 w-3 lg:h-4 lg:w-4" />
             </Button>
           )
         },
+        cell: ({ row }) => {
+          const symbol = row.getValue("tckrSymb") as string;
+          return (
+            <div className="font-medium text-xs lg:text-sm">
+              {symbol}
+            </div>
+          );
+        },
+        size: 80,
     },
       {
         id: "buyactions",
+        header: "B",
         cell: ({ row }) => {
           const symb = row.getValue("tckrSymb");
 
           return (
             <div className="grid grid-flow-col auto-cols-max gap-x-1">
-            <BuyActionPopover symbol={symb}/>
+              <BuyActionPopover symbol={symb}/>
             </div>
           )
         },
+        size: 30,
       },
       {
         id: "sellactions",
+        header: "S",
         cell: ({ row }) => {
           const symb = row.getValue("tckrSymb");
 
           return (
             <div className="grid grid-flow-col auto-cols-max gap-x-1">
-            <SellActionPopover symbol={symb} holdqty={row.getValue("avgQty")}/>
+              <SellActionPopover symbol={symb} holdqty={row.getValue("avgQty")}/>
             </div>
           )
         },
+        size: 30,
       },
     {
     accessorKey: "avgQty",
         header: "Qty",
+        cell: ({ row }) => {
+          const qty = row.getValue("avgQty") as number;
+          return <span className="text-xs lg:text-sm">{qty}</span>;
+        },
+        size: 50,
     },
     {
     accessorKey: "avgCost",
         header: "Avg. Cost",
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("avgCost"))
-            return  new Intl.NumberFormat('en-IN').format(cp) ;
-        }
-
+            return <span className="text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</span>;
+        },
+        size: 80,
     },
     {
     accessorKey: "totCost",
@@ -92,25 +111,27 @@ export const columns: ColumnDef<HoldingValue>[] = [
             <Button
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs lg:text-sm font-medium"
             >
               Total Cost
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <ArrowUpDown className="ml-1 lg:ml-2 h-3 w-3 lg:h-4 lg:w-4" />
             </Button>
           )
         },
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("totCost"))
-            return  new Intl.NumberFormat('en-IN').format(cp) ;
-        }
-
+            return <span className="text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</span>;
+        },
+        size: 90,
     },
     {
       accessorKey: "lastPric",
         header: "LTP",
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("lastPric"))
-            return  new Intl.NumberFormat('en-IN').format(cp) ;
-        }
+            return <span className="text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</span>;
+        },
+        size: 70,
     },
     {
     accessorKey: "currValue",
@@ -119,16 +140,18 @@ export const columns: ColumnDef<HoldingValue>[] = [
             <Button
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs lg:text-sm font-medium"
             >
               Current Value
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <ArrowUpDown className="ml-1 lg:ml-2 h-3 w-3 lg:h-4 lg:w-4" />
             </Button>
           )
         },
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("currValue"))
-            return  new Intl.NumberFormat('en-IN').format(cp) ;
-        }
+            return <span className="text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</span>;
+        },
+        size: 90,
     },
     {
         accessorKey: "dayChng",
@@ -137,37 +160,40 @@ export const columns: ColumnDef<HoldingValue>[] = [
             <Button
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs lg:text-sm font-medium"
             >
               Day P&L
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <ArrowUpDown className="ml-1 lg:ml-2 h-3 w-3 lg:h-4 lg:w-4" />
             </Button>
           )
         },
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("dayChng"))
             if(cp < 0 ){
-                return  <p className="text-red-600">{new Intl.NumberFormat('en-IN').format(cp)}</p> ;
+                return  <p className="text-red-600 text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</p> ;
             } else if (cp > 0 ){
-                return  <p className="text-green-700">{new Intl.NumberFormat('en-IN').format(cp)}</p>  ;
+                return  <p className="text-green-700 text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</p>  ;
             } else if (cp == 0 ){
-                 return  <p >{cp}</p>  ;
+                 return  <p className="text-xs lg:text-sm">{cp}</p>  ;
              }
-        }
+        },
+        size: 70,
     },
 
     {
       accessorKey: "dayChngPct",
-      header: "Day Change%",
+      header: "Day%",
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("dayChngPct"))
             if(cp < 0 ){
-                return  <p className="text-red-600">{cp}</p> ;
+                return  <p className="text-red-600 text-xs lg:text-sm">{cp}</p> ;
             } else if (cp > 0 ){
-                return  <p className="text-green-700">{cp}</p>  ;
+                return  <p className="text-green-700 text-xs lg:text-sm">{cp}</p>  ;
             } else if (cp == 0 ){
-                 return  <p >{cp}</p>  ;
+                 return  <p className="text-xs lg:text-sm">{cp}</p>  ;
              }
-        }
+        },
+        size: 50,
     },
     {
         accessorKey: "pnl",
@@ -176,36 +202,39 @@ export const columns: ColumnDef<HoldingValue>[] = [
             <Button
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs lg:text-sm font-medium"
             >
               Net P&L
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <ArrowUpDown className="ml-1 lg:ml-2 h-3 w-3 lg:h-4 lg:w-4" />
             </Button>
           )
         },
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("pnl"))
             if(cp < 0 ){
-                return  <p className="text-red-600">{new Intl.NumberFormat('en-IN').format(cp)}</p> ;
+                return  <p className="text-red-600 text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</p> ;
             } else if (cp > 0 ){
-                return  <p className="text-green-700">{new Intl.NumberFormat('en-IN').format(cp)}</p>  ;
+                return  <p className="text-green-700 text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</p>  ;
             } else if (cp == 0 ){
-                 return  <p >{cp}</p>  ;
+                 return  <p className="text-xs lg:text-sm">{cp}</p>  ;
              }
-        }
+        },
+        size: 80,
     },
     {
       accessorKey: "netChngPct",
-      header: "Net Change%",
+      header: "Net%",
         cell: ({ row }) => {
             const cp = parseFloat(row.getValue("netChngPct"))
             if(cp < 0 ){
-                return  <p className="text-red-600">{cp}</p> ;
+                return  <p className="text-red-600 text-xs lg:text-sm">{cp}</p> ;
             } else if (cp > 0 ){
-                return  <p className="text-green-700">{cp}</p>  ;
+                return  <p className="text-green-700 text-xs lg:text-sm">{cp}</p>  ;
             } else if (cp == 0 ){
-                return  <p >{cp}</p>  ;
+                return  <p className="text-xs lg:text-sm">{cp}</p>  ;
             }
-        }
+        },
+        size: 50,
     },
 
       {
@@ -216,9 +245,9 @@ export const columns: ColumnDef<HoldingValue>[] = [
           return (
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button variant="ghost" className="h-6 w-6 lg:h-8 lg:w-8 p-0">
                   <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreHorizontal className="h-3 w-3 lg:h-4 lg:w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -229,6 +258,7 @@ export const columns: ColumnDef<HoldingValue>[] = [
             </DropdownMenu>
           )
         },
+        size: 40,
       },
 
 ]
