@@ -60,7 +60,7 @@ export function useWatchlist(watchlistId: number = 1) {
       }
     },
     enabled: !!hosturl && !!user,
-    refetchInterval: 10000, // Refetch every 10 seconds - reduced from 3s to prevent excessive calls
+    refetchInterval: 10000, // Refetch every 10 seconds - matched with dummy service interval
     refetchIntervalInBackground: true,
   });
 
@@ -86,7 +86,7 @@ export function useWatchlist(watchlistId: number = 1) {
       return {};
     },
     enabled: !!user && !!hosturl,
-    refetchInterval: 5000, // Refetch every 5 seconds to prevent dropdown closing
+    refetchInterval: 10000, // Refetch every 10 seconds - matched with dummy service
     refetchIntervalInBackground: true,
   });
 
@@ -196,7 +196,7 @@ export function useWatchlist(watchlistId: number = 1) {
       }
     },
     enabled: !!hosturl && !!getLatestTradeDate.data,
-    refetchInterval: 10000, // Refetch every 10 seconds - reduced from 3s to prevent excessive calls
+    refetchInterval: 10000, // Refetch every 10 seconds - matched with dummy service interval
     refetchIntervalInBackground: true,
   });
 
@@ -228,7 +228,7 @@ export function useWatchlist(watchlistId: number = 1) {
       return pricesMap;
     },
     enabled: !!hosturl && !!symbols && symbols.length > 0,
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 10000, // Refetch every 10 seconds - matched with dummy service
     refetchIntervalInBackground: true,
   });
 

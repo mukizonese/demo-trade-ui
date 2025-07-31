@@ -72,7 +72,7 @@ function HoldingsExample({ userId }: { userId?: number }) {
       
       const hosturl = process.env.NEXT_PUBLIC_TRADING_API_URL;
       const queryClientHoldings = useQueryClient();
-      const [intervalSec, setIntervalSec] = React.useState(10000) //10000 is 10s
+      const [intervalSec, setIntervalSec] = React.useState(10000) //10000 is 10s - matched with dummy service
       const [effectiveUserId, setEffectiveUserId] = React.useState<number | null>(null);
 
       // Get the authenticated user's trading user ID

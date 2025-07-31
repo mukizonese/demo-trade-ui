@@ -56,9 +56,9 @@ export default function WatchListGrid({ currentWatchlistId, onWatchlistChange }:
 
 function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchListGridProps) {
     const [tradeDate, setTradeDate] = React.useState<Date>()
-    const [intervalMs, setIntervalMs] = React.useState(2000) // Default to 2 seconds
+    const [intervalMs, setIntervalMs] = React.useState(10000) // Default to 10 seconds - matched with dummy service
     const [value, setValue] = React.useState('')
-    const [intervalSec, setIntervalSec] = React.useState(2000) // Default to 2 seconds
+    const [intervalSec, setIntervalSec] = React.useState(10000) // Default to 10 seconds - matched with dummy service
     const { user } = useSimpleAuth();
 
     // Auth is handled by SharedAuthNav component

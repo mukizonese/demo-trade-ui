@@ -54,8 +54,8 @@ function Example() {
         const [tradeDate, setTradeDate] = React.useState<Date>(new Date("2024-12-02"))
         const [tradeDateString, setTradeDateString] = useState("2024-12-02 00:00:00")
         const queryClient = useQueryClient()
-        const [intervalMs, setIntervalMs] = React.useState(5000)
-        const [intervalSec, setIntervalSec] = React.useState(5000) //10000 is 10s
+        const [intervalMs, setIntervalMs] = React.useState(10000)
+        const [intervalSec, setIntervalSec] = React.useState(10000) //10000 is 10s - matched with dummy service
 
         // Fetch latest trade date using React Query
         const { data: latestDate, isLoading: isLoadingLatestDate } = useQuery({
@@ -67,7 +67,7 @@ function Example() {
                 }
                 return response.json();
             },
-            refetchInterval: 30000, // Refetch every 30 seconds
+            refetchInterval: 10000, // Refetch every 10 seconds - matched with dummy service
         });
 
         // Set trade date when latest date is available
