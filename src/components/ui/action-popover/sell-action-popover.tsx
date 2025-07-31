@@ -67,7 +67,7 @@ export default function SellActionPopover(props : any) {
         <ActionPopoverQuery symbol={props.symbol} holdqty = {props.holdqty} price={price} onActionClick={onActionClick} />
       ) : (
         <button 
-          className="px-0.5 py-0 text-xs font-medium text-red-600 border border-red-500 rounded hover:bg-red-50 h-2 w-2"
+          className="px-1 py-0.5 text-xs font-medium text-red-600 border border-red-500 rounded hover:bg-red-50 h-5 w-5"
           onClick={handleSellClick}
         >
           S
@@ -121,7 +121,7 @@ export function ActionPopoverQuery(props : any) {
         }
       }}>
         <PopoverTrigger asChild>
-          <button onClick={handlePopoverTriggerClick} className="px-0.5 py-0 text-xs font-medium text-red-600 border border-red-400 rounded hover:bg-red-50 h-2 w-2">
+          <button onClick={handlePopoverTriggerClick} className="px-1 py-0.5 text-xs font-medium text-red-600 border border-red-400 rounded hover:bg-red-50 h-5 w-5">
             S
           </button>
         </PopoverTrigger>

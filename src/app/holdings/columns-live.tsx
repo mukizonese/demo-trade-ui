@@ -13,6 +13,41 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {BuyActionPopover} from "@/components/ui/action-popover/buy-action-popover"
 import {SellActionPopover} from "@/components/ui/action-popover/sell-action-popover"
+import { TradeDetailsModal } from "@/components/ui/trade-details-modal"
+import { useState } from "react"
+
+// Wrapper component for the actions cell to handle modal state
+function ActionsCell({ trade }: { trade: HoldingValue }) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  return (
+    <>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-6 w-6 lg:h-8 lg:w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-3 w-3 lg:h-4 lg:w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => setIsModalOpen(true)}>
+            View trade details
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      <TradeDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        symbol={trade.tckrSymb}
+        totalQty={trade.avgQty}
+        ltp={trade.lastPric}
+      />
+    </>
+  )
+}
 
 export type HoldingValue = {
     tckrSymb : string
@@ -70,7 +105,7 @@ export const columns: ColumnDef<HoldingValue>[] = [
             </div>
           )
         },
-        size: 30,
+        size: 25,
       },
       {
         id: "sellactions",
@@ -84,7 +119,7 @@ export const columns: ColumnDef<HoldingValue>[] = [
             </div>
           )
         },
-        size: 30,
+        size: 25,
       },
     {
     accessorKey: "avgQty",
@@ -241,22 +276,7 @@ export const columns: ColumnDef<HoldingValue>[] = [
         id: "actions",
         cell: ({ row }) => {
           const trade = row.original
-
-          return (
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-6 w-6 lg:h-8 lg:w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-3 w-3 lg:h-4 lg:w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>View trade details</DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )
+          return <ActionsCell trade={trade} />
         },
         size: 40,
       },

@@ -66,7 +66,7 @@ export default function BuyActionPopover(props : any) {
         <ActionPopoverQuery symbol={props.symbol} price={price} onActionClick={onActionClick} />
       ) : (
         <button 
-          className="px-0.5 py-0 text-xs font-medium text-blue-600 border border-blue-500 rounded hover:bg-blue-50 h-2 w-2"
+          className="px-1 py-0.5 text-xs font-medium text-blue-600 border border-blue-500 rounded hover:bg-blue-50 h-5 w-5"
           onClick={handleBuyClick}
         >
           B
@@ -118,7 +118,7 @@ export function ActionPopoverQuery(props : any) {
         }
       }}>
         <PopoverTrigger asChild>
-          <button onClick={handlePopoverTriggerClick} className="px-0.5 py-0 text-xs font-medium text-blue-600 border border-blue-400 rounded hover:bg-blue-50 h-2 w-2">
+          <button onClick={handlePopoverTriggerClick} className="px-1 py-0.5 text-xs font-medium text-blue-600 border border-blue-400 rounded hover:bg-blue-50 h-5 w-5">
             B
           </button>
         </PopoverTrigger>
