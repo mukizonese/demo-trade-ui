@@ -10,9 +10,8 @@ export default function Dashboard({
    }>) {
 
   return (
-            <div className="flex min-h-4 w-full items-center justify-center p-6 md:p-10">
-                   DASHBOARD coming up ...
-            </div>
-
+    <div className="w-full">
+      {children}
+    </div>
   );
 }

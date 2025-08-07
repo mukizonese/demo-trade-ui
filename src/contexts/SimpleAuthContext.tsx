@@ -142,6 +142,18 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('auth_user');
       sessionStorage.removeItem('auth_user');
       
+      // Clear auth cookies more aggressively for OAuth users
+      const cookieDomain = process.env.NODE_ENV === 'production' ? '.mukizone.com' : '';
+      const secure = process.env.NODE_ENV === 'production';
+      const sameSite = process.env.NODE_ENV === 'production' ? 'None' : 'Lax';
+      
+      // Clear auth_token cookie
+      document.cookie = `auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=${sameSite}${secure ? '; Secure' : ''}${cookieDomain ? `; Domain=${cookieDomain}` : ''}`;
+      
+      // Clear any other auth-related cookies
+      document.cookie = `sb-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=${sameSite}${secure ? '; Secure' : ''}${cookieDomain ? `; Domain=${cookieDomain}` : ''}`;
+      document.cookie = `sb-refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=${sameSite}${secure ? '; Secure' : ''}${cookieDomain ? `; Domain=${cookieDomain}` : ''}`;
+      
       // Redirect to home page
       window.location.href = '/';
     } catch (error) {
@@ -150,6 +162,15 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setSkipGuestLogin(true);
       localStorage.setItem('skipGuestLogin', 'true'); // Persist in localStorage
+      
+      // Also clear cookies in error case
+      const cookieDomain = process.env.NODE_ENV === 'production' ? '.mukizone.com' : '';
+      const secure = process.env.NODE_ENV === 'production';
+      const sameSite = process.env.NODE_ENV === 'production' ? 'None' : 'Lax';
+      
+      document.cookie = `auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=${sameSite}${secure ? '; Secure' : ''}${cookieDomain ? `; Domain=${cookieDomain}` : ''}`;
+      document.cookie = `sb-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=${sameSite}${secure ? '; Secure' : ''}${cookieDomain ? `; Domain=${cookieDomain}` : ''}`;
+      document.cookie = `sb-refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=${sameSite}${secure ? '; Secure' : ''}${cookieDomain ? `; Domain=${cookieDomain}` : ''}`;
     }
   }, []);
 

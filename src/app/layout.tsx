@@ -32,20 +32,18 @@ export const metadata: Metadata = {
 };
 
 const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Market", href: "/trades" },
   { name: "Dashboard", href: "/dashboard" },
+  { name: "Market", href: "/trades" },
   { name: "Holdings", href: "/holdings" },
-  { name: "Architecture", href: "/architecture" },
+  { name: "About", href: "/about" },
 ];
 
 const mobileNavigation = [
-  { name: "Home", href: "/" },
+  { name: "Dashboard", href: "/dashboard" },
   { name: "Watch", href: "/watch" },
   { name: "Market", href: "/trades" },
-  { name: "Dashboard", href: "/dashboard" },
   { name: "Holdings", href: "/holdings" },
-  { name: "Architecture", href: "/architecture" },
+  { name: "About", href: "/about" },
 ];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {

@@ -11,6 +11,91 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { usePriceChangeEffectWithQuery } from '@/hooks/usePriceChangeEffectWithQuery';
+
+// Price Cell Component for Trades
+function PriceCell({ price, symbol }: { price: number; symbol: string }) {
+    const { isChanged, changeType, flashClass } = usePriceChangeEffectWithQuery(price, symbol);
+    
+    if (price === 0 || price === null || price === undefined) {
+        return <span className="text-gray-400">N/A</span>;
+    }
+    
+    const baseClasses = "transition-all duration-200";
+    const changeClasses = isChanged ? flashClass : '';
+    
+    return (
+        <span className={`${baseClasses} ${changeClasses}`}>
+            {String(price)}
+        </span>
+    );
+}
+
+// Change Price Cell Component for Trades
+function ChangePriceCell({ value, currentPrice, symbol }: { value: number; currentPrice: number; symbol: string }) {
+    const { isChanged, changeType, flashClass } = usePriceChangeEffectWithQuery(currentPrice, symbol);
+    
+    if (value === null || value === undefined) {
+        return <span className="text-gray-400">N/A</span>;
+    }
+    const cp = parseFloat(value.toString());
+    if (cp === 0 || isNaN(cp)) {
+        return <span className="text-gray-400">N/A</span>;
+    }
+    
+    const baseClasses = "transition-all duration-200";
+    const changeClasses = isChanged ? flashClass : '';
+    
+    if(cp < 0 ){
+        return (
+            <p className={`text-red-600 ${baseClasses} ${changeClasses}`}>
+                {String(cp)}
+            </p>
+        );
+    } else if (cp > 0 ){
+        return (
+            <p className={`text-green-700 ${baseClasses} ${changeClasses}`}>
+                {String(cp)}
+            </p>
+        );
+    } else if (cp == 0 ){
+        return <p>{cp}</p>;
+    }
+    return <span className="text-gray-400">N/A</span>;
+}
+
+// Change Percentage Cell Component for Trades
+function ChangePercentageCell({ value, currentPrice, symbol }: { value: number; currentPrice: number; symbol: string }) {
+    const { isChanged, changeType, flashClass } = usePriceChangeEffectWithQuery(currentPrice, symbol);
+    
+    if (value === null || value === undefined) {
+        return <span className="text-gray-400">N/A</span>;
+    }
+    const cp = parseFloat(value.toString());
+    if (cp === 0 || isNaN(cp)) {
+        return <span className="text-gray-400">N/A</span>;
+    }
+    
+    const baseClasses = "transition-all duration-200";
+    const changeClasses = isChanged ? flashClass : '';
+    
+    if(cp < 0 ){
+        return (
+            <p className={`text-red-600 ${baseClasses} ${changeClasses}`}>
+                {cp.toFixed(2)}%
+            </p>
+        );
+    } else if (cp > 0 ){
+        return (
+            <p className={`text-green-700 ${baseClasses} ${changeClasses}`}>
+                {cp.toFixed(2)}%
+            </p>
+        );
+    } else if (cp == 0 ){
+        return <p>{cp.toFixed(2)}%</p>;
+    }
+    return <span className="text-gray-400">N/A</span>;
+}
 
 export type Trade = {
    tradDt: Date
@@ -68,6 +153,10 @@ export const columns: ColumnDef<Trade>[] = [
     {
       accessorKey: "lastPric",
       header: "Last Traded Price",
+      cell: ({ row }) => {
+        const price = row.getValue("lastPric") as number;
+        return <PriceCell price={price} symbol={row.original.tckrSymb} />;
+      },
     },
 /*     {
       accessorKey: "clsPric",
@@ -77,24 +166,18 @@ export const columns: ColumnDef<Trade>[] = [
         accessorKey: "chngePric",
         header: "Change Price",
         cell: ({ row }) => {
-            const cp = parseFloat(row.getValue("chngePric"))
-            if(cp < 0 ){
-                return  <p className="text-red-600">{cp}</p> ;
-            } else if (cp > 0 ){
-                return  <p className="text-green-700">{cp}</p>  ;
-            }
+            const value = row.getValue("chngePric") as number;
+            const currentPrice = row.original.lastPric;
+            return <ChangePriceCell value={value} currentPrice={currentPrice} symbol={row.original.tckrSymb} />;
         }
     },
     {
       accessorKey: "chngePricPct",
       header: "Change%",
         cell: ({ row }) => {
-            const cp = parseFloat(row.getValue("chngePricPct"))
-            if(cp < 0 ){
-                return  <p className="text-red-600">{cp}</p> ;
-            } else if (cp > 0 ){
-                return  <p className="text-green-700">{cp}</p>  ;
-            }
+            const value = row.getValue("chngePricPct") as number;
+            const currentPrice = row.original.lastPric;
+            return <ChangePercentageCell value={value} currentPrice={currentPrice} symbol={row.original.tckrSymb} />;
         }
     },
       {

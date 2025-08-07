@@ -15,7 +15,84 @@ import {
 import {BuyActionPopover} from "@/components/ui/action-popover/buy-action-popover"
 import {SellActionPopover} from "@/components/ui/action-popover/sell-action-popover"
 import { X, TrendingUp, TrendingDown } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { usePriceChangeEffectWithQuery } from '@/hooks/usePriceChangeEffectWithQuery';
+
+// Price Cell Component for Watchlist
+function PriceCell({ price, symbol }: { price: number; symbol: string }) {
+    const { isChanged, changeType, flashClass } = usePriceChangeEffectWithQuery(price, symbol);
+    
+    // Debug logging on every render
+    // console.log(`🔍 [WATCHLIST RENDER] Symbol: ${symbol}, Price: ${price}, isChanged: ${isChanged}, changeType: ${changeType}, flashClass: ${flashClass}`);
+    
+    if (price === 0 || price === null || price === undefined) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    
+    const baseClasses = "text-xs lg:text-sm transition-all duration-200";
+    const changeClasses = isChanged ? flashClass : '';
+    
+    return (
+        <span className={`${baseClasses} ${changeClasses}`}>
+            {String(price)}
+        </span>
+    );
+}
+
+// Change Price Cell Component for Watchlist
+function ChangePriceCell({ value }: { value: number }) {
+    if (value === null || value === undefined) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    const cp = parseFloat(value.toString());
+    if (cp === 0 || isNaN(cp)) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    
+    if(cp < 0 ){
+        return (
+            <p className="text-red-600 text-xs lg:text-sm">
+                {String(cp)}
+            </p>
+        );
+    } else if (cp > 0 ){
+        return (
+            <p className="text-green-700 text-xs lg:text-sm">
+                {String(cp)}
+            </p>
+        );
+    } else if (cp == 0 ){
+        return <p className="text-xs lg:text-sm">{cp}</p>;
+    }
+    return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+}
+
+// Change Percentage Cell Component for Watchlist
+function ChangePercentageCell({ value }: { value: number }) {
+    if (value === null || value === undefined) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    const cp = parseFloat(value.toString());
+    if (cp === 0 || isNaN(cp)) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    
+    if(cp < 0 ){
+        return (
+            <p className="text-red-600 text-xs lg:text-sm">
+                {cp.toFixed(2)}%
+            </p>
+        );
+    } else if (cp > 0 ){
+        return (
+            <p className="text-green-700 text-xs lg:text-sm">
+                {cp.toFixed(2)}%
+            </p>
+        );
+    } else if (cp == 0 ){
+        return <p className="text-xs lg:text-sm">{cp.toFixed(2)}%</p>;
+    }
+    return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+}
 
 export type WatchList = {
    tradDt: Date
@@ -56,11 +133,9 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
       accessorKey: "lastPric",
       header: "LTP",
       cell: ({ row }) => {
-        const price = row.getValue("lastPric") as any;
-        if (price === 0 || price === null || price === undefined || price === 'N/A') {
-          return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
-        }
-        return <span className="text-xs lg:text-sm">{String(price)}</span>;
+        const price = row.getValue("lastPric") as number;
+        const symbol = row.getValue("tckrSymb") as string;
+        return <PriceCell price={price} symbol={symbol} />;
       },
       size: 60,
     },
@@ -69,19 +144,8 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
         header: "Chg",
         size: 50,
         cell: ({ row }) => {
-            const value = row.getValue("chngePric") as any;
-            if (value === null || value === undefined || value === 'N/A') {
-                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
-            }
-            const cp = parseFloat(value);
-            if (cp === 0 || isNaN(cp)) {
-                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
-            } else if(cp < 0 ){
-                return  <p className="text-red-600 text-xs lg:text-sm">{cp}</p> ;
-            } else if (cp > 0 ){
-                return  <p className="text-green-700 text-xs lg:text-sm">{cp}</p>  ;
-            }
-            return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+            const value = row.getValue("chngePric") as number;
+            return <ChangePriceCell value={value} />;
         }
     },
     {
@@ -89,19 +153,8 @@ export const createWatchlistColumns = (onRemoveSymbol?: (symbol: string) => void
       header: "Chg%",
       size: 40,
         cell: ({ row }) => {
-            const value = row.getValue("chngePricPct") as any;
-            if (value === null || value === undefined || value === 'N/A') {
-                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
-            }
-            const cp = parseFloat(value);
-            if (cp === 0 || isNaN(cp)) {
-                return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
-            } else if(cp < 0 ){
-                return  <p className="text-red-600 text-xs lg:text-sm">{cp}</p> ;
-            } else if (cp > 0 ){
-                return  <p className="text-green-700 text-xs lg:text-sm">{cp}</p>  ;
-            }
-            return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+            const value = row.getValue("chngePricPct") as number;
+            return <ChangePercentageCell value={value} />;
         }
     },
   ];

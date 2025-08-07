@@ -15,6 +15,58 @@ import {BuyActionPopover} from "@/components/ui/action-popover/buy-action-popove
 import {SellActionPopover} from "@/components/ui/action-popover/sell-action-popover"
 import { TradeDetailsModal } from "@/components/ui/trade-details-modal"
 import { useState } from "react"
+import { usePriceChangeEffectWithQuery } from '@/hooks/usePriceChangeEffectWithQuery';
+
+// Price Cell Component for Holdings
+function PriceCell({ price, symbol }: { price: number; symbol: string }) {
+    const { isChanged, changeType, flashClass } = usePriceChangeEffectWithQuery(price, symbol);
+    
+    if (price === 0 || price === null || price === undefined) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    
+    const baseClasses = "text-xs lg:text-sm transition-all duration-200";
+    const changeClasses = isChanged ? flashClass : '';
+    
+    return (
+        <span className={`${baseClasses} ${changeClasses}`}>
+            {new Intl.NumberFormat('en-IN').format(price)}
+        </span>
+    );
+}
+
+// Day Change Cell Component for Holdings
+function DayChangeCell({ value, currentPrice, symbol }: { value: number; currentPrice: number; symbol: string }) {
+    const { isChanged, changeType, flashClass } = usePriceChangeEffectWithQuery(currentPrice, symbol);
+    
+    if (value === null || value === undefined) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    const cp = parseFloat(value.toString());
+    if (cp === 0 || isNaN(cp)) {
+        return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+    }
+    
+    const baseClasses = "text-xs lg:text-sm transition-all duration-200";
+    const changeClasses = isChanged ? flashClass : '';
+    
+    if(cp < 0 ){
+        return (
+            <p className={`text-red-600 ${baseClasses} ${changeClasses}`}>
+                {new Intl.NumberFormat('en-IN').format(cp)}
+            </p>
+        );
+    } else if (cp > 0 ){
+        return (
+            <p className={`text-green-700 ${baseClasses} ${changeClasses}`}>
+                {new Intl.NumberFormat('en-IN').format(cp)}
+            </p>
+        );
+    } else if (cp == 0 ){
+        return <p className="text-xs lg:text-sm">{cp}</p>;
+    }
+    return <span className="text-gray-400 text-xs lg:text-sm">N/A</span>;
+}
 
 // Wrapper component for the actions cell to handle modal state
 function ActionsCell({ trade }: { trade: HoldingValue }) {
@@ -163,8 +215,8 @@ export const columns: ColumnDef<HoldingValue>[] = [
       accessorKey: "lastPric",
         header: "LTP",
         cell: ({ row }) => {
-            const cp = parseFloat(row.getValue("lastPric"))
-            return <span className="text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</span>;
+            const price = row.getValue("lastPric") as number;
+            return <PriceCell price={price} symbol={row.original.tckrSymb} />;
         },
         size: 70,
     },
@@ -203,14 +255,9 @@ export const columns: ColumnDef<HoldingValue>[] = [
           )
         },
         cell: ({ row }) => {
-            const cp = parseFloat(row.getValue("dayChng"))
-            if(cp < 0 ){
-                return  <p className="text-red-600 text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</p> ;
-            } else if (cp > 0 ){
-                return  <p className="text-green-700 text-xs lg:text-sm">{new Intl.NumberFormat('en-IN').format(cp)}</p>  ;
-            } else if (cp == 0 ){
-                 return  <p className="text-xs lg:text-sm">{cp}</p>  ;
-             }
+            const value = row.getValue("dayChng") as number;
+            const currentPrice = row.original.lastPric;
+            return <DayChangeCell value={value} currentPrice={currentPrice} symbol={row.original.tckrSymb} />;
         },
         size: 70,
     },

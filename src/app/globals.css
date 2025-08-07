@@ -77,6 +77,159 @@ body {
   }
 }
 
+/* ========================================
+   GLOBAL FLASHING EFFECTS - ALL COMPONENTS
+   ========================================
+   This section contains all flashing-related styles used across:
+   - Watchlist
+   - Trades Grid
+   - Holdings Grid
+   - Holdings Cards
+   - Any other price-sensitive components
+   ======================================== */
+
+/* Flash Animation Keyframes */
+@keyframes flash-green {
+  0%, 100% { 
+    background-color: transparent; 
+    color: inherit;
+  }
+  25%, 75% { 
+    background-color: rgba(34, 197, 94, 0.2); 
+    color: #22c55e;
+    font-weight: 600;
+  }
+}
+
+@keyframes flash-red {
+  0%, 100% { 
+    background-color: transparent; 
+    color: inherit;
+  }
+  25%, 75% { 
+    background-color: rgba(239, 68, 68, 0.2); 
+    color: #ef4444;
+    font-weight: 600;
+  }
+}
+
+/* Arrow Persistence Animation - Black arrows during extended period */
+@keyframes arrow-persist {
+  0% {
+    opacity: 1;
+    color: #000000; /* Black color during extended period */
+  }
+  100% {
+    opacity: 0;
+    color: #000000; /* Keep black until fade out */
+  }
+}
+
+@keyframes pulse-scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes border-glow {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+/* Flash Animation Classes - Used by all components */
+.animate-flash-green {
+  animation: flash-green 6s ease-in-out !important;
+}
+
+.animate-flash-red {
+  animation: flash-red 6s ease-in-out !important;
+}
+
+/* ========================================
+   DIRECTIONAL ARROWS - ALL COMPONENTS
+   ======================================== */
+
+/* Basic Directional Arrows (legacy - for backward compatibility) */
+.price-change-up {
+  position: relative;
+}
+
+.price-change-up::after {
+  content: "↑";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #22c55e;
+  font-size: 0.75rem;
+  font-weight: 500;
+  animation: flash-green 6s ease-in-out !important;
+}
+
+.price-change-down {
+  position: relative;
+}
+
+.price-change-down::after {
+  content: "↓";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 500;
+  animation: flash-red 6s ease-in-out !important;
+}
+
+/* Extended Directional Arrows - Stay visible for 4 seconds after flash ends */
+.price-change-up-extended {
+  position: relative;
+}
+
+.price-change-up-extended::after {
+  content: "↑";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #22c55e;
+  font-size: 0.75rem;
+  font-weight: 500;
+  animation: flash-green 6s ease-in-out, arrow-persist 4s ease-in-out 6s forwards !important;
+}
+
+.price-change-down-extended {
+  position: relative;
+}
+
+.price-change-down-extended::after {
+  content: "↓";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 500;
+  animation: flash-red 6s ease-in-out, arrow-persist 4s ease-in-out 6s forwards !important;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 0.6s ease-in-out;
+}
+
+.animate-border-glow {
+  animation: border-glow 1s ease-in-out;
+}
+
+/* ========================================
+   END OF GLOBAL FLASHING EFFECTS
+   ======================================== */
+
+/* Removed magnitude indicators - keeping only flash effects and directional arrows */
+
 /* Mobile-specific improvements */
 @layer components {
   /* Ensure minimum touch target size for mobile */

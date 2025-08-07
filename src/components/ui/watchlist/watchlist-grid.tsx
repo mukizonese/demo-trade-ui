@@ -48,13 +48,14 @@ interface WatchListGridProps {
 export default function WatchListGrid({ currentWatchlistId, onWatchlistChange }: WatchListGridProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools />
+      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
       <WatchListGridQuery currentWatchlistId={currentWatchlistId} onWatchlistChange={onWatchlistChange} />
     </QueryClientProvider>
   )
 }
 
 function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchListGridProps) {
+    
     const [tradeDate, setTradeDate] = React.useState<Date>()
     const [intervalMs, setIntervalMs] = React.useState(10000) // Default to 10 seconds - matched with dummy service
     const [value, setValue] = React.useState('')
@@ -134,8 +135,8 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
         isLoading: isLoadingPrices 
     } = getLatestPrices;
 
-    // Combine symbols with trade data
-    const combinedData = useMemo(() => {
+    // Use raw React Query data for price change effects to work properly
+    const data = useMemo(() => {
         if (!user || !user.id) {
           return [];
         }
@@ -144,58 +145,40 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
             return [];
         }
 
-        if (!serverData || serverData.length === 0) {
-            // Return placeholder data for symbols without trade data
-            return symbols.map((symbol: string) => ({
-                tckrSymb: symbol,
-                lastPric: null,
-                chngePric: null,
-                chngePricPct: null,
-                tradDt: new Date(),
-                prvsClsgPric: null
+        // If we have server data, use it directly (this allows price change effects to work)
+        if (serverData && serverData.length > 0) {
+            // Ensure each item has prvsClsgPric field for the hook to work
+            return serverData.map((item: any) => ({
+                ...item,
+                prvsClsgPric: item.prvsClsgPric || item.lastPric || 0
             }));
         }
 
-        // Create a map of trade data by symbol
-        const tradesMap = new Map();
-        serverData.forEach((trade: any) => {
-            tradesMap.set(trade.tckrSymb, trade);
-        });
-
-        // Combine symbols with their trade data
-        const combined = symbols.map((symbol: string) => {
-            const trade = tradesMap.get(symbol);
-            if (trade) {
-                // Return the trade data if available
-                return trade;
+        // Fallback: combine symbols with latest prices or placeholder data
+        return symbols.map((symbol: string) => {
+            const latestPrice = latestPrices[symbol];
+            if (latestPrice && latestPrice.lastPric) {
+                // Use latest price data if available
+                return {
+                    tckrSymb: symbol,
+                    lastPric: latestPrice.lastPric,
+                    chngePric: latestPrice.chngePric || 0,
+                    chngePricPct: latestPrice.chngePricPct || 0,
+                    tradDt: new Date(),
+                    prvsClsgPric: latestPrice.prvsClsgPric || 0
+                };
             } else {
-                // Try to get latest price data as fallback
-                const latestPrice = latestPrices[symbol];
-                if (latestPrice && latestPrice.lastPric) {
-                    // Use latest price data if available
-                    return {
-                        tckrSymb: symbol,
-                        lastPric: latestPrice.lastPric,
-                        chngePric: latestPrice.chngePric || 0,
-                        chngePricPct: latestPrice.chngePricPct || 0,
-                        tradDt: new Date(),
-                        prvsClsgPric: latestPrice.prvsClsgPric || 0
-                    };
-                } else {
-                    // Return a placeholder for symbols without any data
-                    return {
-                        tckrSymb: symbol,
-                        lastPric: null,
-                        chngePric: null,
-                        chngePricPct: null,
-                        tradDt: new Date(),
-                        prvsClsgPric: null
-                    };
-                }
+                // Return a placeholder for symbols without any data
+                return {
+                    tckrSymb: symbol,
+                    lastPric: null,
+                    chngePric: null,
+                    chngePricPct: null,
+                    tradDt: new Date(),
+                    prvsClsgPric: null
+                };
             }
         });
-
-        return combined;
     }, [symbols, serverData, latestPrices, user]);
 
     if (status === 'pending' || isLoadingPrices) return <h1>Loading...</h1>
@@ -207,7 +190,7 @@ function WatchListGridQuery({ currentWatchlistId, onWatchlistChange }: WatchList
             <div className="flex-1 min-h-0">
                 <DataTable 
                     columns={createWatchlistColumns(removeSymbol)} 
-                    data={combinedData} 
+                    data={data} 
                     onRemoveSymbol={removeSymbol}
                     holdingsMap={holdingsMap}
                 />

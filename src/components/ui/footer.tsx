@@ -13,14 +13,13 @@ export default function Footer() {
           rel="noopener noreferrer"
         >
 
-          <Image
-                className="dark:invert"
-                src="https://nextjs.org/icons/next.svg"
-                alt="Next.js"
-                width={50}
-                height={20}
-                priority
-              />
+        <Image 
+              className="dark:invert" 
+              src="/icons/next-wordmark-logo.svg" 
+              alt="Next.js" 
+              width={50} 
+              height={20} 
+              priority />
 
         </a>
 

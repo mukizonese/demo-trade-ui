@@ -18,8 +18,26 @@ import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button";
 import { BuyActionPopover } from "@/components/ui/action-popover/buy-action-popover"
 import { SellActionPopover } from "@/components/ui/action-popover/sell-action-popover"
+import { usePriceChangeEffectWithQuery } from "@/hooks/usePriceChangeEffectWithQuery";
 
 const queryClientHoldings = new QueryClient()
+
+// Mobile Price Cell Component with Price Change Effects
+function MobilePriceCell({ currentValue, symbol }: { 
+    currentValue: number; 
+    symbol: string; 
+}) {
+    const { flashClass } = usePriceChangeEffectWithQuery(
+        currentValue,
+        symbol
+    );
+
+    return (
+        <p className={`text-sm font-medium ${flashClass}`}>
+            {new Intl.NumberFormat('en-IN').format(currentValue)}
+        </p>
+    );
+}
 
 export type Holdings = {
 
@@ -189,6 +207,12 @@ function HoldingsExample({ userId }: { userId?: number }) {
             return <div className="text-center p-4">No holdings data available</div>;
         }
 
+        // Debug: Log holdings symbols
+        if (serverData.transactionlist && serverData.transactionlist.length > 0) {
+            const symbols = serverData.transactionlist.map((h: any) => h.tckrSymb);
+            // console.log(`🔍 [HOLDINGS GRID] Current holdings symbols:`, symbols, `Timestamp: ${new Date().toISOString()}`);
+        }
+
         // Check if user is authenticated trader
         const isGuest = !user || user.role !== 'trader';
 
@@ -307,7 +331,10 @@ function HoldingsExample({ userId }: { userId?: number }) {
                                         </div>
                                         <div>
                                             <span className="text-xs text-gray-600">LTP</span>
-                                            <p className="text-sm font-medium">{new Intl.NumberFormat('en-IN').format(holding.lastPric)}</p>
+                                            <MobilePriceCell 
+                                                currentValue={holding.lastPric} 
+                                                symbol={holding.tckrSymb}
+                                            />
                                         </div>
                                         <div>
                                             <span className="text-xs text-gray-600">Invested</span>
@@ -345,11 +372,17 @@ function HoldingsExample({ userId }: { userId?: number }) {
                                             <div className="text-right">
                                                 <span className="text-xs text-gray-600">Day Chg.</span>
                                                 <div className="text-sm font-bold">
-                                                    {holding.dayChngPct < 0 ? (
-                                                        <span className="text-red-600">{holding.dayChngPct.toFixed(2)}%</span>
-                                                    ) : (
-                                                        <span className="text-green-700">{holding.dayChngPct.toFixed(2)}%</span>
-                                                    )}
+                                                    <MobilePriceCell 
+                                                        currentValue={holding.dayChng} 
+                                                        symbol={holding.tckrSymb}
+                                                    />
+                                                    <div className="text-xs">
+                                                        {holding.dayChngPct < 0 ? (
+                                                            <span className="text-red-600">{holding.dayChngPct.toFixed(2)}%</span>
+                                                        ) : (
+                                                            <span className="text-green-700">{holding.dayChngPct.toFixed(2)}%</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
